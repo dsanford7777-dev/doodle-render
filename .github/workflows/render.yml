@@ -1,0 +1,134 @@
+name: Render
+# Push render.json ({"composition": "...", "chunks": 10, optional "range": [first, last]}) and this
+# renders that composition in parallel silent chunks, joins them, renders the composition's own
+# soundtrack (narration + effects, as placed in the code) in one pass, and muxes the two.
+# Narration, word timings and YouTube Audio Library effects live encrypted in secure/ and are unlocked with the
+# ASSET_KEY secret. The finished MP4 is kept encrypted as a 3-day artifact; the private repo downloads and decrypts it.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [render.json]
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: render
+  cancel-in-progress: false
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      composition: ${{ steps.p.outputs.composition }}
+      total: ${{ steps.p.outputs.total }}
+      matrix: ${{ steps.p.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - name: Unlock private assets
+        env: { ASSET_KEY: "${{ secrets.ASSET_KEY }}" }
+        run: |
+          [ -n "$ASSET_KEY" ] || { echo "::error::ASSET_KEY secret is missing (Settings > Secrets and variables > Actions)"; exit 1; }
+          for f in secure/*.tar.enc; do
+            case "$f" in secure/sfx-*) dest=public/sfx ;; *) dest=public ;; esac
+            mkdir -p "$dest"
+            openssl enc -d -aes-256-cbc -pbkdf2 -pass env:ASSET_KEY -in "$f" | tar -xf - -C "$dest"
+          done
+      - id: p
+        run: |
+          COMP=$(node -e "console.log(JSON.parse(require('fs').readFileSync('render.json','utf8')).composition)")
+          npx remotion compositions src/index.ts 2>&1 | tee comps.txt
+          TOTAL=$(sed 's/\x1b\[[0-9;]*m//g' comps.txt | awk -v c="$COMP" '$1==c {print $4}')
+          echo "frames for $COMP: $TOTAL"
+          node scripts/plan.mjs "$TOTAL"
+
+  render:
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.plan.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - name: Unlock private assets
+        env: { ASSET_KEY: "${{ secrets.ASSET_KEY }}" }
+        run: |
+          [ -n "$ASSET_KEY" ] || { echo "::error::ASSET_KEY secret is missing (Settings > Secrets and variables > Actions)"; exit 1; }
+          for f in secure/*.tar.enc; do
+            case "$f" in secure/sfx-*) dest=public/sfx ;; *) dest=public ;; esac
+            mkdir -p "$dest"
+            openssl enc -d -aes-256-cbc -pbkdf2 -pass env:ASSET_KEY -in "$f" | tar -xf - -C "$dest"
+          done
+      - name: Render chunk ${{ matrix.i }} (frames ${{ matrix.a }}-${{ matrix.b }})
+        run: |
+          set -o pipefail
+          START=$(date +%s)
+          npx remotion render src/index.ts "${{ needs.plan.outputs.composition }}" chunk.mp4 \
+            --frames=${{ matrix.a }}-${{ matrix.b }} --muted --concurrency=4 \
+            --codec=h264 --crf=14 --timeout=600000 2>&1 | tail -8
+          mkdir -p part
+          mv chunk.mp4 part/chunk_$(printf %02d ${{ matrix.i }}).mp4
+          echo "chunk ${{ matrix.i }} (frames ${{ matrix.a }}-${{ matrix.b }}): $(( $(date +%s) - START )) s" > part/time_$(printf %02d ${{ matrix.i }}).txt
+          cat part/time_*.txt
+      - uses: actions/upload-artifact@v4
+        with: { name: "chunk-${{ matrix.i }}", path: part/, retention-days: 1 }
+
+  stitch:
+    needs: [plan, render]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - name: Unlock private assets
+        env: { ASSET_KEY: "${{ secrets.ASSET_KEY }}" }
+        run: |
+          [ -n "$ASSET_KEY" ] || { echo "::error::ASSET_KEY secret is missing (Settings > Secrets and variables > Actions)"; exit 1; }
+          for f in secure/*.tar.enc; do
+            case "$f" in secure/sfx-*) dest=public/sfx ;; *) dest=public ;; esac
+            mkdir -p "$dest"
+            openssl enc -d -aes-256-cbc -pbkdf2 -pass env:ASSET_KEY -in "$f" | tar -xf - -C "$dest"
+          done
+      - uses: actions/download-artifact@v4
+        with: { pattern: chunk-*, merge-multiple: true, path: parts }
+      - name: Soundtrack (one pass, exact timing)
+        run: |
+          RANGE=$(node -e "const c=JSON.parse(require('fs').readFileSync('render.json','utf8'));console.log(Array.isArray(c.range)?'--frames='+c.range[0]+'-'+c.range[1]:'')")
+          npx remotion render src/index.ts "${{ needs.plan.outputs.composition }}" sound.wav --codec=wav $RANGE 2>&1 | tail -4
+          [ -s sound.wav ] || { echo "::error::soundtrack render produced no audio"; exit 1; }
+      - name: Join chunks + mux
+        run: |
+          sudo apt-get -qq update >/dev/null && sudo apt-get -qq install -y ffmpeg >/dev/null
+          ls parts | sort | grep '^chunk_' | sed "s|^|file 'parts/|; s|$|'|" > list.txt
+          ffmpeg -loglevel error -y -f concat -safe 0 -i list.txt -c copy video.mp4
+          ffmpeg -loglevel error -y -i video.mp4 -i sound.wav -map 0:v -map 1:a -c:v copy -c:a aac -b:a 256k \
+            -shortest -movflags +faststart out.mp4 && mv out.mp4 video.mp4
+          SOUND=$(ffprobe -v error -select_streams a:0 -show_entries stream=duration -of csv=p=0 video.mp4)
+          [ -n "$SOUND" ] || { echo "::error::finished video has no audio track"; exit 1; }
+          FRAMES=$(ffprobe -v error -count_frames -select_streams v:0 -show_entries stream=nb_read_frames -of csv=p=0 video.mp4)
+          {
+            echo "## Render: ${{ needs.plan.outputs.composition }}"
+            echo "- Frames: $FRAMES (expected ${{ needs.plan.outputs.total }})"
+            echo "- Audio track: ${SOUND}s"
+            echo "- Chunk times:"; cat parts/time_*.txt | sed 's/^/  - /'
+          } | tee report.md >> $GITHUB_STEP_SUMMARY
+          if [ "$FRAMES" != "${{ needs.plan.outputs.total }}" ]; then
+            echo "::error::frame count $FRAMES does not match expected ${{ needs.plan.outputs.total }}"; exit 1
+          fi
+          # the artifact is downloadable by any signed-in GitHub user, so it is encrypted with the same key
+          openssl enc -aes-256-cbc -pbkdf2 -salt -pass env:ASSET_KEY -in video.mp4 -out "${{ needs.plan.outputs.composition }}.mp4.enc"
+        env: { ASSET_KEY: "${{ secrets.ASSET_KEY }}" }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: video
+          path: |
+            ${{ needs.plan.outputs.composition }}.mp4.enc
+            report.md
+          retention-days: 3
