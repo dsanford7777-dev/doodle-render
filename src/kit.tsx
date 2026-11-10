@@ -223,6 +223,9 @@ export const Icon: React.FC<{ kind: string; x: number; y: number; s?: number; se
     <Box x={x - 26 * s} y={y - 28 * s} w={52 * s} h={56 * s} r={5} fill="#fff" seed={seed} sw={4} />
     <Ink pts={[[x - 26 * s, y - 12 * s], [x + 26 * s, y - 12 * s]]} sw={4} seed={seed + 1} col={COL.red} />
     <Txt x={x} y={y + 18 * s} size={24 * s} font={HAND2}>12</Txt></g>);
+  if (kind === "house") return (<g>
+    <Box x={x - 22 * s} y={y - 10 * s} w={44 * s} h={34 * s} r={3} fill={col ?? "#f4d9a8"} seed={seed} sw={3} />
+    <Ink pts={[[x - 28 * s, y - 8 * s], [x, y - 32 * s], [x + 28 * s, y - 8 * s]]} closed fill={col ? COL.red : "#c9c2b2"} seed={seed + 1} sw={3} /></g>);
   if (kind === "coin") return (<g>
     <Oval cx={x} cy={y} rx={30 * s} ry={30 * s} fill={col ?? COL.amber} seed={seed} sw={4} />
     <Txt x={x} y={y + 9 * s} size={22 * s} col={COL.ink}>$75</Txt></g>);
