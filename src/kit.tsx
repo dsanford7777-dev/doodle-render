@@ -140,15 +140,21 @@ export const Stamp: React.FC<{ t: number; at: number; x: number; y: number; text
     );
   };
 
-/** caption: current line, words light up as spoken (word times in frames, relative to the shot) */
-export const Caption: React.FC<{ t: number; words: { w: string; at: number }[] }> = ({ t, words }) => {
+/** caption: dark box under the picture, the line being spoken; money/numbers and any `hi` words in yellow */
+export const KEY = "#ffd23f";
+const norm = (w: string) => w.toLowerCase().replace(/[^a-z0-9$%]/g, "");
+export const Caption: React.FC<{ t: number; words: { w: string; at: number }[]; hi?: string[] }> = ({ t, words, hi = [] }) => {
   if (!words.length) return null;
+  const H = new Set(hi.map(norm));
   return (
-    <div style={{ position: "absolute", left: 160, right: 160, bottom: 70, textAlign: "center", fontFamily: HAND, fontWeight: 700,
-      fontSize: 60, lineHeight: 1.2, color: "#fff", textShadow: "0 0 6px #000, 0 3px 0 #000, 0 -3px 0 #000, 3px 0 0 #000, -3px 0 0 #000" }}>
-      {words.map((x, i) => (
-        <span key={i} style={{ color: t >= x.at ? (/\$|\d/.test(x.w) ? COL.amber : "#fff") : "rgba(255,255,255,0.55)" }}>{x.w} </span>
-      ))}
+    <div style={{ position: "absolute", left: 0, right: 0, bottom: 64, display: "flex", justifyContent: "center" }}>
+      <div style={{ maxWidth: 1500, padding: "14px 34px 18px", borderRadius: 18, background: "rgba(14,17,24,0.9)",
+        boxShadow: "0 6px 0 rgba(0,0,0,0.25)", textAlign: "center", fontFamily: HAND, fontWeight: 700, fontSize: 56, lineHeight: 1.18, color: "#fff" }}>
+        {words.map((x, i) => {
+          const key = /\$|\d/.test(x.w) || H.has(norm(x.w));
+          return <span key={i} style={{ color: key ? KEY : "#fff", opacity: t >= x.at ? 1 : 0.5 }}>{x.w} </span>;
+        })}
+      </div>
     </div>
   );
 };
@@ -173,7 +179,139 @@ export const Sfx: React.FC<{ name: string; at: number; vol?: number; dur?: numbe
 );
 
 /** captions from timeline.lines(): shows the line being spoken, words light up as they are said */
-export const Captions: React.FC<{ t: number; lines: { start: number; end: number; words: { w: string; at: number }[] }[] }> = ({ t, lines }) => {
+export const Captions: React.FC<{ t: number; lines: { start: number; end: number; words: { w: string; at: number }[] }[]; hi?: string[] }> = ({ t, lines, hi }) => {
   const line = lines.find((l) => t >= l.start - 2 && t < l.end);
-  return line ? <Caption t={t} words={line.words} /> : null;
+  return line ? <Caption t={t} words={line.words} hi={hi} /> : null;
 };
+
+// ── scene templates (MapScroll / Crayon Capital structure, drawn in our doodle style) ───────────
+/** dark pill name tag: people, places, sources */
+export const Tag: React.FC<{ t: number; at: number; x: number; y: number; text: string; size?: number; bg?: string; col?: string; r?: number }> =
+  ({ t, at, x, y, text, size = 40, bg = "#15181f", col = "#fff", r = 0 }) => {
+    const w = text.length * size * 0.56 + size * 1.1, h = size * 1.55;
+    return (
+      <PopG t={t} at={at} x={x} y={y} r={r}>
+        <Ink pts={rrect(x - w / 2, y - h / 2, w, h, h / 2)} closed fill={bg} sw={5} seed={41} col={COL.ink} />
+        <Txt x={x} y={y + size * 0.36} size={size} col={col}>{text}</Txt>
+      </PopG>
+    );
+  };
+
+/** big hand-lettered number that pops in and counts up (fmt turns the running value into text) */
+export const BigNum: React.FC<{ t: number; at: number; x: number; y: number; to: number; from?: number; dur?: number; size?: number;
+  col?: string; fmt?: (n: number) => string; r?: number; sub?: string }> =
+  ({ t, at, x, y, to, from = 0, dur = 18, size = 150, col = COL.ink, fmt = money, r = -2, sub }) => {
+    if (t < at) return null;
+    const v = count(t, at, at + dur, from, to);
+    return (
+      <PopG t={t} at={at} x={x} y={y} r={r}>
+        <text x={x} y={y} fontFamily={HAND} fontWeight={700} fontSize={size} textAnchor="middle" fill={col}
+          stroke="#fffdf3" strokeWidth={size * 0.12} strokeLinejoin="round" style={{ paintOrder: "stroke" }}>{fmt(v)}</text>
+        {sub && <Txt x={x} y={y + size * 0.42} size={Math.max(34, size * 0.26)} font={HAND2} col="#4a4a55">{sub}</Txt>}
+      </PopG>
+    );
+  };
+
+/** small doodle icons for swarms */
+export const Icon: React.FC<{ kind: string; x: number; y: number; s?: number; seed?: number; col?: string }> = ({ kind, x, y, s = 1, seed = 1, col }) => {
+  const w = 78 * s, h = 42 * s;
+  if (kind === "bill") return (<g>
+    <Box x={x - w / 2} y={y - h / 2} w={w} h={h} r={5 * s} fill={col ?? "#8fd19e"} seed={seed} sw={4} />
+    <Oval cx={x} cy={y} rx={12 * s} ry={12 * s} fill={col ? "#fff" : "#d7f2dc"} seed={seed + 1} sw={3} />
+    <Txt x={x} y={y + 7 * s} size={20 * s} col="#1d5e33">$</Txt></g>);
+  if (kind === "cal") return (<g>
+    <Box x={x - 26 * s} y={y - 28 * s} w={52 * s} h={56 * s} r={5} fill="#fff" seed={seed} sw={4} />
+    <Ink pts={[[x - 26 * s, y - 12 * s], [x + 26 * s, y - 12 * s]]} sw={4} seed={seed + 1} col={COL.red} />
+    <Txt x={x} y={y + 18 * s} size={24 * s} font={HAND2}>12</Txt></g>);
+  if (kind === "coin") return (<g>
+    <Oval cx={x} cy={y} rx={30 * s} ry={30 * s} fill={col ?? COL.amber} seed={seed} sw={4} />
+    <Txt x={x} y={y + 9 * s} size={22 * s} col={COL.ink}>$75</Txt></g>);
+  return <Oval cx={x} cy={y} rx={20 * s} ry={20 * s} fill={col ?? COL.paper} seed={seed} sw={4} />;
+};
+
+/** a swarm of icons in a grid: pops in one by one from `at`; after `dropAt`, everything past `keep` falls away */
+export const Swarm: React.FC<{ t: number; at: number; n: number; cols: number; x: number; y: number; dx?: number; dy?: number;
+  kind?: string; s?: number; keep?: number; dropAt?: number; stagger?: number; col?: string }> =
+  ({ t, at, n, cols, x, y, dx = 90, dy = 56, kind = "bill", s = 1, keep = n, dropAt = 1e9, stagger = 2, col }) => (
+    <g>
+      {Array.from({ length: n }, (_, i) => {
+        const c = i % cols, r = Math.floor(i / cols);
+        const px = x + (c - (cols - 1) / 2) * dx, py = y + r * dy;
+        const sc = pop(t, at + i * stagger, 8);
+        if (sc <= 0) return null;
+        const fall = i >= keep ? easeOut(k(t, dropAt + (n - i) * 1.2, 16)) : 0;
+        return (
+          <g key={i} opacity={1 - fall} transform={`translate(${px} ${py + fall * 260}) rotate(${fall * (i % 2 ? 40 : -40)}) scale(${sc}) translate(${-px} ${-py})`}>
+            <Icon kind={kind} x={px} y={py} s={s} seed={60 + i * 3} col={i >= keep && t >= dropAt ? "#e9a2a2" : col} />
+          </g>
+        );
+      })}
+    </g>
+  );
+
+/** speech bubble (tail points at tx,ty) */
+export const Bubble: React.FC<{ t: number; at: number; x: number; y: number; w: number; lines: string[]; tx: number; ty: number; size?: number; col?: string }> =
+  ({ t, at, x, y, w, lines, tx, ty, size = 50, col = COL.ink }) => {
+    const h = lines.length * size * 1.15 + size * 0.9;
+    return (
+      <PopG t={t} at={at} x={tx} y={ty}>
+        <Ink pts={[[x + w * 0.3, y + h - 6], [tx, ty], [x + w * 0.45, y + h - 6]]} closed fill="#fff" sw={6} seed={51} />
+        <Box x={x} y={y} w={w} h={h} r={36} fill="#fff" seed={52} sw={7} />
+        {lines.map((l, i) => <Txt key={i} x={x + w / 2} y={y + size * 1.1 + i * size * 1.15} size={size} col={col}>{l}</Txt>)}
+      </PopG>
+    );
+  };
+
+/** dashed hand line (limits, caps) */
+export const Dash: React.FC<{ x1: number; x2: number; y: number; col?: string; seed?: number }> = ({ x1, x2, y, col = COL.green, seed = 1 }) => (
+  <g>{Array.from({ length: Math.floor((x2 - x1) / 44) }, (_, i) => (
+    <Ink key={i} pts={[[x1 + i * 44, y], [x1 + i * 44 + 26, y + 1]]} sw={7} col={col} seed={seed + i} />))}</g>
+);
+
+/** Dave Ramsey caricature (suit, grin, grey swept hair). Only ever "says" verified quotes. */
+export const Dave: React.FC<{ x: number; y: number; s?: number; arm?: "idle" | "point" | "cash"; grin?: boolean; seed?: number }> =
+  ({ x, y, s = 1, arm = "idle", grin = true, seed = 300 }) => {
+    const f = useCurrentFrame();
+    const b = useBoil(seed, 4);
+    const by = Math.sin(f / 15) * 3;
+    const suit = "#2f3440", tie = "#b83232", hair = "#b8b8bc";
+    return (
+      <g transform={`translate(${x} ${y + by * 0.3}) scale(${s})`}>
+        {/* legs + shoes */}
+        <Ink pts={[[-30, -150], [-34, 0]]} sw={22} col={suit} seed={b} />
+        <Ink pts={[[30, -150], [36, 0]]} sw={22} col={suit} seed={b + 1} />
+        <Oval cx={-44} cy={4} rx={30} ry={12} fill={COL.ink} seed={b + 2} sw={3} />
+        <Oval cx={48} cy={4} rx={30} ry={12} fill={COL.ink} seed={b + 3} sw={3} />
+        {/* suit body */}
+        <Ink pts={[[-92, -140], [-82, -350], [82, -350], [92, -140]]} closed fill={suit} seed={b + 4} sw={7} />
+        <Ink pts={[[-30, -350], [0, -250], [30, -350]]} closed fill="#fff" seed={b + 5} sw={5} />
+        <Ink pts={[[-10, -330], [10, -330], [16, -230], [0, -205], [-16, -230]]} closed fill={tie} seed={b + 6} sw={4} />
+        {/* arms */}
+        <Ink pts={[[-80, -330], [-112, -250], [-108, -170]]} sw={26} col={suit} seed={b + 7} />
+        <Oval cx={-108} cy={-160} rx={20} ry={18} fill={COL.skin} seed={b + 8} sw={5} />
+        {arm === "point"
+          ? <><Ink pts={[[80, -330], [150, -370], [215, -400]]} sw={26} col={suit} seed={b + 9} /><Oval cx={228} cy={-406} rx={20} ry={18} fill={COL.skin} seed={b + 10} sw={5} /></>
+          : arm === "cash"
+            ? <><Ink pts={[[80, -330], [130, -290], [160, -250]]} sw={26} col={suit} seed={b + 9} />
+                <g transform="translate(185 -262) rotate(-12)"><Icon kind="bill" x={0} y={0} s={1.3} seed={b + 11} /><Icon kind="bill" x={6} y={-16} s={1.3} seed={b + 12} /></g>
+                <Oval cx={165} cy={-246} rx={20} ry={18} fill={COL.skin} seed={b + 10} sw={5} /></>
+            : <><Ink pts={[[80, -330], [112, -250], [108, -170]]} sw={26} col={suit} seed={b + 9} /><Oval cx={108} cy={-160} rx={20} ry={18} fill={COL.skin} seed={b + 10} sw={5} /></>}
+        {/* head: broad jaw */}
+        <Ink pts={[[-78, -470], [-84, -420], [-70, -378], [-36, -352], [36, -352], [70, -378], [84, -420], [78, -470], [60, -520], [0, -536], [-60, -520]]} closed fill={COL.skin} seed={b + 13} sw={7} />
+        <Oval cx={-84} cy={-440} rx={14} ry={20} fill={COL.skin} seed={b + 14} sw={5} />
+        <Oval cx={84} cy={-440} rx={14} ry={20} fill={COL.skin} seed={b + 15} sw={5} />
+        {/* grey hair swept back, high forehead */}
+        <Ink pts={[[-80, -470], [-86, -516], [-50, -556], [20, -566], [70, -540], [84, -486], [66, -500], [50, -528], [-10, -536], [-60, -512], [-70, -478]]} closed fill={hair} seed={b + 16} sw={6} />
+        {/* brows, eyes, nose */}
+        <Ink pts={[[-50, -478], [-18, -484]]} sw={7} seed={b + 17} />
+        <Ink pts={[[18, -484], [50, -478]]} sw={7} seed={b + 18} />
+        <Oval cx={-33} cy={-458} rx={6} ry={7} fill={COL.ink} seed={b + 19} sw={2} />
+        <Oval cx={33} cy={-458} rx={6} ry={7} fill={COL.ink} seed={b + 20} sw={2} />
+        <Ink pts={[[0, -455], [-10, -420], [6, -416]]} sw={5} seed={b + 21} />
+        {/* the grin */}
+        {grin
+          ? <Ink pts={[[-44, -398], [0, -372], [44, -398], [0, -384]]} closed fill="#fff" sw={6} seed={b + 22} />
+          : <Ink pts={[[-30, -390], [30, -390]]} sw={6} seed={b + 22} />}
+      </g>
+    );
+  };
