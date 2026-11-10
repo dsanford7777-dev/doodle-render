@@ -175,8 +175,12 @@ export const Prop: React.FC<{ kind: string; x: number; y: number; s?: number; se
         <Box x={-230} y={-60} w={460} h={120} r={60} fill={COL.red} seed={seed} />
         <Txt x={0} y={22} size={64} col="#fff">SUBSCRIBE</Txt></g>);
       case "thumb": return (<g>
-        <Box x={-60} y={-40} w={120} h={130} r={20} fill={COL.skin} seed={seed} />
-        <Box x={-30} y={-140} w={60} h={110} r={26} fill={COL.skin} seed={seed + 1} /></g>);
+        {/* "like" badge: a fist on its side with the thumb up at the left, knuckles on the right */}
+        <Oval cx={0} cy={0} rx={170} ry={170} fill="#ffffff" seed={seed} sw={8} />
+        <Box x={-30} y={-150} w={56} h={130} r={28} fill={COL.skin} seed={seed + 1} sw={7} />
+        <Box x={-70} y={-40} w={150} h={140} r={26} fill={COL.skin} seed={seed + 2} sw={7} />
+        {[-5, 30, 65].map((yy, i) => <Ink key={i} pts={[[20, yy], [78, yy + 2]]} sw={6} seed={seed + 3 + i} />)}
+        <Box x={-125} y={-48} w={50} h={156} r={10} fill={COL.navy} seed={seed + 8} sw={7} /></g>);
       case "comment": return (<g>
         <Oval cx={-330} cy={-30} rx={44} ry={44} fill="#b7c4d6" seed={seed} sw={5} />
         <Box x={-270} y={-90} w={640} h={150} r={22} fill="#fff" seed={seed + 1} sw={6} /></g>);
