@@ -2,6 +2,7 @@
 //  - the maths ("Running Dave's Plan") now comes straight after the hook (it used to wait until 1:26)
 //  - "as of last week" is cut, so the video doesn't date itself (the rate's date is shown on screen)
 //  - "What Dave Admits" follows the maths, without its "So let's test it..." lead-in
+//  - the square-footage line is cut (its "2,300 now" overstates Census's 2,146 for 2024)
 //  - the "$1,270 is the raise that never showed up" comparison is cut (apples to oranges)
 import WORDS from "../../public/ramsey/words.json";
 import { makeTimeline } from "../timeline";
@@ -17,7 +18,10 @@ export const TL = makeTimeline(
     { from: "Freddie Mac has the average", to: "worse, not better.", gap: 0.05 },
     { from: "Let's be fair to the man", to: "the man", gap: 0.6 },
     { from: "because I want his fans", to: "the steps, and wait.", gap: 0.05 },
-    { from: "Quick one: if this is useful,", to: "a month before taxes.", gap: 0.6 },
+    { from: "Quick one: if this is useful,", to: "a month in today's dollars.", gap: 0.6 },
+    // cut: "And houses today are bigger: ... about 1,500 square feet in the early '70s to about 2,300 now."
+    // (Census: 1,525 in 1973 vs 2,146 for homes completed in 2024, so "2,300" overstates it)
+    { from: "Fair points. I'm not hiding them.", to: "a month before taxes.", gap: 0.5 },
     // cut: "Remember that $1,270 monthly shortfall? That's about the size of the raise that never showed up."
     // (it compared one worker's pre-tax raise with a household's take-home gap)
     { from: "Now, EPI leans pro-labor,", to: "$END", gap: 0.5 },
