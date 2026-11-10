@@ -67,7 +67,7 @@ const SPECS: ShotSpec[] = [
     { k: "prop", w: "subscribe", kind: "subscribe", x: 1400, y: 640, s: 1.1 },
   ] },
   { at: "Now, Dave's fans already have", items: [
-    { k: "comment", w: "Then buy less house.", x: 820, y: 380, text: "“Then buy less house.”", size: 60 },
+    { k: "comment", x: 820, y: 380, text: "“Then buy less house.”", size: 60 },
     { k: "guy", w: "Okay. Let's do that.", x: 1600, y: 860, s: 0.6, pose: "shrug", expr: "deadpan" },
   ] },
   { at: "Working his rule backwards", tone: "#eef2f6", items: [
@@ -105,6 +105,7 @@ const SPECS: ShotSpec[] = [
       { w: "still can't afford", text: "still can't afford a home", mark: "x", col: R } ] },
   ] },
   { at: "So what does everybody else do?", items: [
+    { k: "txt", x: 960, y: 220, text: "everybody else?", size: 80 },
     { k: "prop", w: "They rent.", kind: "apartment", x: 860, y: 820, s: 1.2 },
     { k: "guy", w: "They rent.", x: 1460, y: 860, s: 0.6, pose: "idle", expr: "defeated" },
   ] },
@@ -138,6 +139,8 @@ const SPECS: ShotSpec[] = [
   ] },
   // ── "Your grandparents had it worse" ────────────────────────────────────────────────────────────
   { at: "Now, the smartest Ramsey fans", items: [
+    { k: "guy", x: 1560, y: 860, s: 0.6, pose: "point", expr: "smug" },
+    { k: "tag", x: 1520, y: 450, text: "the best counter-argument", size: 36 },
     { k: "comment", w: "Your grandparents", x: 700, y: 300, text: "“Your grandparents had it worse.”", size: 54 },
     { k: "num", w: "over 16% in 1981.", x: 960, y: 640, to: 16, f: "raw", pre: "", post: "%+ in 1981", size: 140, col: R, sub: "mortgage rates" },
   ] },
@@ -149,7 +152,7 @@ const SPECS: ShotSpec[] = [
     { k: "tag", w: "One analysis", x: 1500, y: 620, text: "Census + Freddie Mac data", size: 32 },
   ] },
   { at: "Fair points. I'm not hiding them.", items: [
-    { k: "list", w: "That brutal 1981", x: 160, y: 170, wd: 760, h: 480, title: "1981", fill: "#f3ece0", items: [
+    { k: "list", x: 160, y: 170, wd: 760, h: 480, title: "1981", fill: "#f3ece0", items: [
       { w: "That brutal 1981", text: "~$2,800 / month", mark: "none", size: 56 },
       { w: "30-year loan.", text: "30-YEAR loan", mark: "none", col: G, size: 56 } ] },
     { k: "list", w: "Dave's plan today", x: 1000, y: 170, wd: 760, h: 480, title: "2026, Dave's way", fill: "#eef2f6", items: [
@@ -279,6 +282,7 @@ const SPECS: ShotSpec[] = [
     { k: "prop", w: "you get a budgeting worksheet.", kind: "sheet", x: 1560, y: 680, s: 0.8 },
   ] },
   { at: "That's my problem with Dave's plan.", items: [
+    { k: "txt", x: 960, y: 140, text: "my problem with Dave's plan", size: 64 },
     { k: "stamp", w: "Not that it's mean.", x: 520, y: 260, text: "NOT MEAN", size: 60, col: N },
     { k: "tag", w: "diagnoses a rigged game,", x: 520, y: 520, text: "diagnoses: a RIGGED game", size: 46, bg: R },
     { k: "prop", w: "then grades you", kind: "grade", x: 1350, y: 520, s: 1.1 },
@@ -297,6 +301,8 @@ const SPECS: ShotSpec[] = [
     { k: "tag", w: "a credit card at 25%", x: 1300, y: 790, text: "25% credit card", size: 34, bg: R },
   ] },
   { at: "Where I'd push back is waiting.", items: [
+    { k: "prop", kind: "clock", x: 1650, y: 400, s: 0.7 },
+    { k: "tag", x: 1650, y: 450, text: "waiting", size: 40, bg: R },
     { k: "prop", w: "a 401(k) match,", kind: "jar", x: 700, y: 720, s: 1.3 },
     { k: "tag", w: "a 401(k) match,", x: 700, y: 280, text: "401(k) MATCH", size: 48, bg: G },
     { k: "txt", w: "that's free money,", x: 700, y: 200, text: "free money", size: 60, col: G },
@@ -305,6 +311,7 @@ const SPECS: ShotSpec[] = [
     { k: "stamp", w: "leaves part of your pay", x: 1400, y: 780, text: "PAY LEFT ON THE TABLE", size: 44 },
   ] },
   { at: "And on housing, here's my honest take:", tone: "#f6efe6", items: [
+    { k: "txt", x: 960, y: 420, text: "my honest take:", size: 72 },
     { k: "stamp", w: "the rules aren't the problem.", x: 560, y: 220, text: "RULES: FINE", size: 60, col: G, r: -4 },
     { k: "stamp", w: "The prices are.", x: 1360, y: 220, text: "PRICES: THE PROBLEM", size: 60, r: 4 },
     { k: "prop", w: "a house worth half", kind: "house", x: 420, y: 760, s: 0.5 },
@@ -329,7 +336,7 @@ const SPECS: ShotSpec[] = [
       { w: "He's wrong that", text: "the plan is the whole story", size: 56, mark: "x" } ] },
   ] },
   { at: "So here's my question.", items: [
-    { k: "tag", w: "Ramsey fans,", x: 960, y: 140, text: "RAMSEY FANS: PICK ONE", size: 48 },
+    { k: "tag", x: 960, y: 140, text: "RAMSEY FANS: PICK ONE", size: 48 },
     { k: "list", w: "Is the answer really", x: 160, y: 250, wd: 760, h: 300, fill: "#eaf3e6", items: [
       { w: "Is the answer really", text: "A: just wait,", size: 52, mark: "none" },
       { w: "buy less house,\"", text: "buy less house", size: 52, mark: "none" } ] },
