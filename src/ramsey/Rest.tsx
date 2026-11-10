@@ -339,6 +339,7 @@ const SPECS: ShotSpec[] = [
     { k: "tag", w: "Pick one in the comments,", x: 960, y: 615, text: "tell me why in the comments", size: 40 },
     { k: "prop", w: "subscribe,", kind: "subscribe", x: 960, y: 800, s: 0.9 },
     { k: "txt", w: "every week.", x: 960, y: 712, text: "new video every week", size: 44, col: R },
+    { k: "tag", w: "every week.", plus: 45, x: 960, y: 955, text: "Beat rising prices: the Simple Money Co ebook (link in description)", size: 34, bg: G },
   ] },
 ];
 

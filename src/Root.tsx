@@ -4,6 +4,7 @@ import { RamseyHook, HOOK_FRAMES } from "./ramsey/Hook";
 import { RamseyMath, MATH_FRAMES } from "./ramsey/Math";
 import { RamseyVoice, VOICE_FRAMES } from "./ramsey/Voice";
 import { RamseyFull, FULL_FRAMES } from "./ramsey/Full";
+import { ThumbA, ThumbB, ThumbC } from "./ramsey/Thumbs";
 
 // the animated opening so far: hook, then straight into the maths
 const RamseyOpening: React.FC = () => (
@@ -19,6 +20,9 @@ export const Root: React.FC = () => (
     <Composition id="RamseyMath" component={RamseyMath} durationInFrames={MATH_FRAMES} fps={30} width={1920} height={1080} />
     <Composition id="RamseyOpening" component={RamseyOpening} durationInFrames={HOOK_FRAMES + MATH_FRAMES} fps={30} width={1920} height={1080} />
     <Composition id="RamseyFull" component={RamseyFull} durationInFrames={FULL_FRAMES} fps={30} width={1920} height={1080} />
+    <Composition id="RamseyThumbA" component={ThumbA} durationInFrames={1} fps={30} width={1920} height={1080} />
+    <Composition id="RamseyThumbB" component={ThumbB} durationInFrames={1} fps={30} width={1920} height={1080} />
+    <Composition id="RamseyThumbC" component={ThumbC} durationInFrames={1} fps={30} width={1920} height={1080} />
     <Composition id="RamseyVoice" component={RamseyVoice} durationInFrames={VOICE_FRAMES} fps={30} width={1920} height={1080} />
   </>
 );
