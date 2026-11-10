@@ -268,50 +268,66 @@ export const Dash: React.FC<{ x1: number; x2: number; y: number; col?: string; s
     <Ink key={i} pts={[[x1 + i * 44, y], [x1 + i * 44 + 26, y + 1]]} sw={7} col={col} seed={seed + i} />))}</g>
 );
 
-/** Dave Ramsey caricature (suit, grin, grey swept hair). Only ever "says" verified quotes. */
+/** Dave Ramsey caricature: bald dome, grey side fringe, wire-rim glasses, white goatee, big grin, dark blazer + open collar.
+ *  Only ever "says" verified quotes. */
 export const Dave: React.FC<{ x: number; y: number; s?: number; arm?: "idle" | "point" | "cash"; grin?: boolean; seed?: number }> =
   ({ x, y, s = 1, arm = "idle", grin = true, seed = 300 }) => {
     const f = useCurrentFrame();
     const b = useBoil(seed, 4);
     const by = Math.sin(f / 15) * 3;
-    const suit = "#2f3440", tie = "#b83232", hair = "#b8b8bc";
+    const coat = "#24262c", shirt = "#1b2840", grey = "#c9c7c0", beard = "#ecebe6", wire = "#6e6e76";
     return (
       <g transform={`translate(${x} ${y + by * 0.3}) scale(${s})`}>
         {/* legs + shoes */}
-        <Ink pts={[[-30, -150], [-34, 0]]} sw={22} col={suit} seed={b} />
-        <Ink pts={[[30, -150], [36, 0]]} sw={22} col={suit} seed={b + 1} />
+        <Ink pts={[[-30, -150], [-34, 0]]} sw={22} col={coat} seed={b} />
+        <Ink pts={[[30, -150], [36, 0]]} sw={22} col={coat} seed={b + 1} />
         <Oval cx={-44} cy={4} rx={30} ry={12} fill={COL.ink} seed={b + 2} sw={3} />
         <Oval cx={48} cy={4} rx={30} ry={12} fill={COL.ink} seed={b + 3} sw={3} />
-        {/* suit body */}
-        <Ink pts={[[-92, -140], [-82, -350], [82, -350], [92, -140]]} closed fill={suit} seed={b + 4} sw={7} />
-        <Ink pts={[[-30, -350], [0, -250], [30, -350]]} closed fill="#fff" seed={b + 5} sw={5} />
-        <Ink pts={[[-10, -330], [10, -330], [16, -230], [0, -205], [-16, -230]]} closed fill={tie} seed={b + 6} sw={4} />
+        {/* blazer over a dark open-collar shirt (no tie) */}
+        <Ink pts={[[-96, -140], [-86, -340], [86, -340], [96, -140]]} closed fill={coat} seed={b + 4} sw={7} />
+        <Ink pts={[[-36, -342], [0, -250], [36, -342]]} closed fill={shirt} seed={b + 5} sw={5} />
+        <Ink pts={[[-36, -342], [-14, -318], [-4, -296]]} sw={5} seed={b + 6} col="#3a4a6a" />
+        <Ink pts={[[36, -342], [14, -318], [4, -296]]} sw={5} seed={b + 7} col="#3a4a6a" />
+        <Ink pts={[[-40, -340], [-20, -240], [-60, -150]]} sw={5} seed={b + 23} col="#000" />
+        <Ink pts={[[40, -340], [20, -240], [60, -150]]} sw={5} seed={b + 24} col="#000" />
         {/* arms */}
-        <Ink pts={[[-80, -330], [-112, -250], [-108, -170]]} sw={26} col={suit} seed={b + 7} />
-        <Oval cx={-108} cy={-160} rx={20} ry={18} fill={COL.skin} seed={b + 8} sw={5} />
+        <Ink pts={[[-84, -320], [-114, -245], [-110, -170]]} sw={26} col={coat} seed={b + 8} />
+        <Oval cx={-110} cy={-160} rx={20} ry={18} fill={COL.skin} seed={b + 9} sw={5} />
         {arm === "point"
-          ? <><Ink pts={[[80, -330], [150, -370], [215, -400]]} sw={26} col={suit} seed={b + 9} /><Oval cx={228} cy={-406} rx={20} ry={18} fill={COL.skin} seed={b + 10} sw={5} /></>
+          ? <><Ink pts={[[84, -320], [150, -362], [215, -392]]} sw={26} col={coat} seed={b + 10} /><Oval cx={228} cy={-398} rx={20} ry={18} fill={COL.skin} seed={b + 11} sw={5} /></>
           : arm === "cash"
-            ? <><Ink pts={[[80, -330], [130, -290], [160, -250]]} sw={26} col={suit} seed={b + 9} />
-                <g transform="translate(185 -262) rotate(-12)"><Icon kind="bill" x={0} y={0} s={1.3} seed={b + 11} /><Icon kind="bill" x={6} y={-16} s={1.3} seed={b + 12} /></g>
-                <Oval cx={165} cy={-246} rx={20} ry={18} fill={COL.skin} seed={b + 10} sw={5} /></>
-            : <><Ink pts={[[80, -330], [112, -250], [108, -170]]} sw={26} col={suit} seed={b + 9} /><Oval cx={108} cy={-160} rx={20} ry={18} fill={COL.skin} seed={b + 10} sw={5} /></>}
-        {/* head: broad jaw */}
-        <Ink pts={[[-78, -470], [-84, -420], [-70, -378], [-36, -352], [36, -352], [70, -378], [84, -420], [78, -470], [60, -520], [0, -536], [-60, -520]]} closed fill={COL.skin} seed={b + 13} sw={7} />
-        <Oval cx={-84} cy={-440} rx={14} ry={20} fill={COL.skin} seed={b + 14} sw={5} />
-        <Oval cx={84} cy={-440} rx={14} ry={20} fill={COL.skin} seed={b + 15} sw={5} />
-        {/* grey hair swept back, high forehead */}
-        <Ink pts={[[-80, -470], [-86, -516], [-50, -556], [20, -566], [70, -540], [84, -486], [66, -500], [50, -528], [-10, -536], [-60, -512], [-70, -478]]} closed fill={hair} seed={b + 16} sw={6} />
-        {/* brows, eyes, nose */}
-        <Ink pts={[[-50, -478], [-18, -484]]} sw={7} seed={b + 17} />
-        <Ink pts={[[18, -484], [50, -478]]} sw={7} seed={b + 18} />
-        <Oval cx={-33} cy={-458} rx={6} ry={7} fill={COL.ink} seed={b + 19} sw={2} />
-        <Oval cx={33} cy={-458} rx={6} ry={7} fill={COL.ink} seed={b + 20} sw={2} />
-        <Ink pts={[[0, -455], [-10, -420], [6, -416]]} sw={5} seed={b + 21} />
-        {/* the grin */}
+            ? <><Ink pts={[[84, -320], [130, -284], [160, -250]]} sw={26} col={coat} seed={b + 10} />
+                <g transform="translate(185 -262) rotate(-12)"><Icon kind="bill" x={0} y={0} s={1.3} seed={b + 12} /><Icon kind="bill" x={6} y={-16} s={1.3} seed={b + 13} /></g>
+                <Oval cx={165} cy={-246} rx={20} ry={18} fill={COL.skin} seed={b + 11} sw={5} /></>
+            : <><Ink pts={[[84, -320], [114, -245], [110, -170]]} sw={26} col={coat} seed={b + 10} /><Oval cx={110} cy={-160} rx={20} ry={18} fill={COL.skin} seed={b + 11} sw={5} /></>}
+        {/* ears, then the big bald dome */}
+        <Oval cx={-90} cy={-448} rx={16} ry={24} fill={COL.skin} seed={b + 14} sw={5} />
+        <Oval cx={90} cy={-448} rx={16} ry={24} fill={COL.skin} seed={b + 15} sw={5} />
+        <Ink pts={[[-82, -440], [-88, -495], [-72, -545], [-38, -574], [0, -582], [38, -574], [72, -545], [88, -495], [82, -440],
+          [74, -398], [48, -364], [18, -348], [-18, -348], [-48, -364], [-74, -398]]} closed fill={COL.skin} seed={b + 16} sw={7} />
+        <Oval cx={-28} cy={-548} rx={22} ry={10} fill="rgba(255,255,255,0.55)" seed={b + 17} sw={0} />
+        {/* grey fringe at the sides only */}
+        <Ink pts={[[-86, -500], [-92, -460], [-84, -428], [-76, -446], [-74, -488]]} closed fill={grey} seed={b + 18} sw={4} />
+        <Ink pts={[[86, -500], [92, -460], [84, -428], [76, -446], [74, -488]]} closed fill={grey} seed={b + 19} sw={4} />
+        {/* goatee + moustache (white), then the grin on top */}
+        <Ink pts={[[-50, -404], [-44, -372], [-22, -350], [22, -350], [44, -372], [50, -404], [30, -384], [0, -378], [-30, -384]]} closed fill={beard} seed={b + 20} sw={4} />
         {grin
-          ? <Ink pts={[[-44, -398], [0, -372], [44, -398], [0, -384]]} closed fill="#fff" sw={6} seed={b + 22} />
-          : <Ink pts={[[-30, -390], [30, -390]]} sw={6} seed={b + 22} />}
+          ? <Ink pts={[[-40, -410], [-20, -390], [0, -386], [20, -390], [40, -410], [0, -404]]} closed fill="#fff" sw={5} seed={b + 21} />
+          : <Ink pts={[[-28, -398], [28, -398]]} sw={6} seed={b + 21} />}
+        <Ink pts={[[-46, -410], [-24, -420], [0, -416], [24, -420], [46, -410], [24, -414], [0, -410], [-24, -414]]} closed fill={beard} seed={b + 22} sw={4} />
+        {/* nose */}
+        <Ink pts={[[-4, -470], [-14, -434], [0, -426], [14, -432]]} sw={5} seed={b + 25} />
+        {/* smiling, squinting eyes + grey brows */}
+        <Ink pts={[[-50, -458], [-36, -466], [-20, -458]]} sw={6} seed={b + 26} />
+        <Ink pts={[[20, -458], [36, -466], [50, -458]]} sw={6} seed={b + 27} />
+        <Ink pts={[[-56, -486], [-38, -494], [-18, -488]]} sw={8} seed={b + 28} col="#8e8c86" />
+        <Ink pts={[[18, -488], [38, -494], [56, -486]]} sw={8} seed={b + 29} col="#8e8c86" />
+        {/* thin wire-rim glasses */}
+        <Ink pts={[[-62, -474], [-14, -474], [-12, -448], [-60, -446]]} closed sw={4} col={wire} seed={b + 30} />
+        <Ink pts={[[14, -474], [62, -474], [60, -446], [12, -448]]} closed sw={4} col={wire} seed={b + 31} />
+        <Ink pts={[[-14, -468], [14, -468]]} sw={4} col={wire} seed={b + 32} />
+        <Ink pts={[[-62, -470], [-84, -462]]} sw={4} col={wire} seed={b + 33} />
+        <Ink pts={[[62, -470], [84, -462]]} sw={4} col={wire} seed={b + 34} />
       </g>
     );
   };
