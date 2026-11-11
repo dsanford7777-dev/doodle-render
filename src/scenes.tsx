@@ -223,6 +223,32 @@ export const Prop: React.FC<{ kind: string; x: number; y: number; s?: number; se
         <Oval cx={-100} cy={0} rx={20} ry={20} fill={COL.paper} seed={seed + 1} sw={5} />
         <Box x={-45} y={-14} w={200} h={28} r={6} fill={KEY} seed={seed + 2} sw={6} />
         <Box x={110} y={10} w={20} h={40} r={4} fill={KEY} seed={seed + 3} sw={5} /><Box x={70} y={10} w={20} h={30} r={4} fill={KEY} seed={seed + 4} sw={5} /></g>);
+      case "factory": return (<g>
+        <Box x={-240} y={-200} w={480} h={200} r={6} fill="#c98f6b" seed={seed} />
+        <Ink pts={[[-240, -200], [-160, -270], [-160, -200], [-80, -270], [-80, -200], [0, -270], [0, -200]]} closed fill="#b07a58" seed={seed + 1} />
+        <Box x={90} y={-380} w={60} h={180} r={4} fill="#8a8f99" seed={seed + 2} sw={6} />
+        <Box x={170} y={-330} w={50} h={130} r={4} fill="#8a8f99" seed={seed + 3} sw={6} />
+        {[0, 1].map((i) => <Oval key={i} cx={130 + i * 70} cy={-420 + i * 40 - ((seed % 7) * 2)} rx={46 - i * 8} ry={28 - i * 4} fill="#e4e4e4" seed={seed + 4 + i} sw={4} />)}
+        {[-190, -110, -30].map((cx, i) => <Box key={i} x={cx} y={-150} w={60} h={50} r={4} fill="#bfe3f2" seed={seed + 7 + i} sw={4} />)}
+        <Box x={50} y={-110} w={80} h={110} r={6} fill="#6b4226" seed={seed + 11} sw={5} />
+        <Txt x={0} y={50} size={34} font={HAND2}>{label ?? ""}</Txt></g>);
+      case "paycheck": return (<g>
+        <Box x={-230} y={-110} w={460} h={220} r={10} fill="#e7f4e4" seed={seed} />
+        <Txt x={-200} y={-55} size={30} anchor="start" font={HAND2}>PAY TO THE ORDER OF</Txt>
+        <Ink pts={[[-200, -20], [60, -18]]} sw={3} col="#999" seed={seed + 1} />
+        <Box x={90} y={-60} w={120} h={56} r={6} fill="#fff" seed={seed + 2} sw={4} />
+        <Txt x={0} y={60} size={54} col={COL.green}>{label ?? ""}</Txt>
+        <Ink pts={[[60, 90], [200, 86]]} sw={3} col="#999" seed={seed + 3} /></g>);
+      case "robot": return (<g>
+        <Box x={-110} y={-40} w={220} h={40} r={8} fill="#8a8f99" seed={seed} />
+        <Ink pts={[[0, -40], [-40, -200], [90, -290]]} sw={34} col="#f59e0b" seed={seed + 1} />
+        <Oval cx={-40} cy={-200} rx={26} ry={26} fill="#555a66" seed={seed + 2} sw={5} />
+        <Oval cx={0} cy={-40} rx={30} ry={22} fill="#555a66" seed={seed + 3} sw={5} />
+        <Ink pts={[[90, -290], [140, -320]]} sw={10} seed={seed + 4} /><Ink pts={[[90, -290], [140, -260]]} sw={10} seed={seed + 5} /></g>);
+      case "hardhat": return (<g>
+        <Ink pts={[[-130, 0], [-110, -90], [-40, -140], [40, -140], [110, -90], [130, 0]]} closed fill="#f5c518" seed={seed} sw={8} />
+        <Box x={-170} y={-10} w={340} h={40} r={16} fill="#f5c518" seed={seed + 1} sw={7} />
+        <Ink pts={[[0, -138], [0, -10]]} sw={7} col="#c99a00" seed={seed + 2} /></g>);
       case "map": return (<g>
         <Box x={-260} y={-180} w={520} h={360} r={14} fill="#e8f0d8" seed={seed} />
         {Array.from({ length: 12 }, (_, i) => <Box key={i} x={-230 + (i % 4) * 120} y={-150 + Math.floor(i / 4) * 110} w={100} h={90} r={6}
@@ -276,7 +302,7 @@ const ItemView: React.FC<{ s: Shot; it: Item; g: number; n: number }> = ({ s, it
     case "guy": {
       let pose = it.pose ?? "idle", expr = it.expr ?? "deadpan";
       for (const [w, p, e] of it.poses ?? []) if (g >= when(s, w)) { pose = p; expr = e; }
-      return g >= at ? <Guy x={it.x} y={it.y} s={it.s ?? 0.7} pose={pose} expr={expr} seed={20 + n} sign={it.sign} /> : null;
+      return g >= at ? <Guy x={it.x} y={it.y} s={it.s ?? 0.7} pose={pose} expr={expr} seed={20 + n} sign={it.sign} hat={it.hat} /> : null;
     }
     case "dave": {
       let arm = it.arm ?? "idle";

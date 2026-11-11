@@ -7,6 +7,8 @@ import { RamseyFull, FULL_FRAMES } from "./ramsey/Full";
 import { ThumbA, ThumbB, ThumbC } from "./ramsey/Thumbs";
 import { Age40, AGE40_FRAMES } from "./age40/Age40";
 import { Age40ThumbA, Age40ThumbB, Age40ThumbC } from "./age40/Thumbs";
+import { America, AMERICA_FRAMES } from "./america/America";
+import { AmericaThumbA, AmericaThumbB, AmericaThumbC } from "./america/Thumbs";
 
 // the animated opening so far: hook, then straight into the maths
 const RamseyOpening: React.FC = () => (
@@ -30,5 +32,9 @@ export const Root: React.FC = () => (
     <Composition id="Age40ThumbA" component={Age40ThumbA} durationInFrames={1} fps={30} width={1920} height={1080} />
     <Composition id="Age40ThumbB" component={Age40ThumbB} durationInFrames={1} fps={30} width={1920} height={1080} />
     <Composition id="Age40ThumbC" component={Age40ThumbC} durationInFrames={1} fps={30} width={1920} height={1080} />
+    <Composition id="AmericaFull" component={America} durationInFrames={AMERICA_FRAMES} fps={30} width={1920} height={1080} />
+    <Composition id="AmericaThumbA" component={AmericaThumbA} durationInFrames={1} fps={30} width={1920} height={1080} />
+    <Composition id="AmericaThumbB" component={AmericaThumbB} durationInFrames={1} fps={30} width={1920} height={1080} />
+    <Composition id="AmericaThumbC" component={AmericaThumbC} durationInFrames={1} fps={30} width={1920} height={1080} />
   </>
 );
