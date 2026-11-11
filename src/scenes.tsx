@@ -249,6 +249,27 @@ export const Prop: React.FC<{ kind: string; x: number; y: number; s?: number; se
         <Ink pts={[[-130, 0], [-110, -90], [-40, -140], [40, -140], [110, -90], [130, 0]]} closed fill="#f5c518" seed={seed} sw={8} />
         <Box x={-170} y={-10} w={340} h={40} r={16} fill="#f5c518" seed={seed + 1} sw={7} />
         <Ink pts={[[0, -138], [0, -10]]} sw={7} col="#c99a00" seed={seed + 2} /></g>);
+      case "lease": return (<g transform="rotate(-4)">
+        <Box x={-150} y={-200} w={300} h={400} r={8} fill="#fffdf3" seed={seed} />
+        <Txt x={0} y={-140} size={44}>LEASE</Txt>
+        {[0, 1, 2].map((i) => <Ink key={i} pts={[[-110, -90 + i * 40], [110, -88 + i * 40]]} sw={3} col="#aaa" seed={seed + 1 + i} />)}
+        {Array.from({ length: 12 }, (_, i) => <Box key={i} x={-120 + (i % 4) * 34} y={40 + Math.floor(i / 4) * 34} w={28} h={28} r={3} fill={i < 12 ? "#e8eef6" : "#fff"} seed={seed + 5 + i} sw={2} />)}
+        <Ink pts={[[30, 150], [120, 146]]} sw={4} seed={seed + 20} /><Txt x={75} y={180} size={22} font={HAND2}>sign here</Txt></g>);
+      case "piggy": return (<g>
+        <Oval cx={0} cy={-120} rx={170} ry={120} fill="#f7b7c3" seed={seed} sw={8} />
+        <Oval cx={160} cy={-130} rx={40} ry={34} fill="#f19aaa" seed={seed + 1} sw={6} />
+        <Ink pts={[[-60, -235], [-30, -275], [0, -230]]} closed fill="#f19aaa" seed={seed + 2} sw={6} />
+        {[-100, -30, 50, 110].map((x0, i) => <Box key={i} x={x0 - 16} y={-20} w={32} h={50} r={8} fill="#f7b7c3" seed={seed + 3 + i} sw={6} />)}
+        <Box x={-50} y={-238} w={100} h={14} r={6} fill="#5a3a3a" seed={seed + 8} sw={3} />
+        <Oval cx={90} cy={-150} rx={8} ry={8} fill={COL.ink} seed={seed + 9} sw={1} />
+        {label === "empty" ? <Icon kind="coin" x={-20} y={-80} s={0.7} seed={seed + 10} /> : null}</g>);
+      case "cart": return (<g>
+        <Ink pts={[[-230, -260], [-180, -260], [-130, -60], [170, -60], [210, -200], [-160, -200]]} sw={10} seed={seed} />
+        <Ink pts={[[-130, -60], [-150, -20], [180, -20]]} sw={8} seed={seed + 1} />
+        <Oval cx={-110} cy={10} rx={24} ry={24} fill="#555" seed={seed + 2} sw={5} /><Oval cx={150} cy={10} rx={24} ry={24} fill="#555" seed={seed + 3} sw={5} />
+        <Box x={-110} y={-320} w={130} h={140} r={6} fill="#e8a33c" seed={seed + 4} sw={5} />
+        <Box x={40} y={-290} w={130} h={110} r={6} fill="#fff" seed={seed + 5} sw={5} />
+        <Txt x={105} y={-228} size={24} font={HAND2}>store</Txt><Txt x={105} y={-200} size={24} font={HAND2}>brand</Txt></g>);
       case "map": return (<g>
         <Box x={-260} y={-180} w={520} h={360} r={14} fill="#e8f0d8" seed={seed} />
         {Array.from({ length: 12 }, (_, i) => <Box key={i} x={-230 + (i % 4) * 120} y={-150 + Math.floor(i / 4) * 110} w={100} h={90} r={6}
