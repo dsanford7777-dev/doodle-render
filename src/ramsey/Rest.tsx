@@ -3,7 +3,7 @@
 // Co-host lines (May 19, 2026 episode) were George Kamel & Rachel Cruze, NOT Dave: never put them in Dave's mouth.
 import { COL, KEY } from "../kit";
 import { TL } from "./edit";
-import { resolveShots, ShotSpec } from "./scenes";
+import { resolveShots, ShotSpec } from "../scenes";
 
 const G = COL.green, R = COL.red, N = COL.navy;
 
@@ -351,7 +351,7 @@ const SPECS: ShotSpec[] = [
 ];
 
 // the rest starts at part 3 of the edit ("Let's be fair to the man"; recorded before the maths, played after it)
-export const REST_SHOTS = resolveShots(SPECS, TL.parts[3].a, TL.totalFrames + 300); // 10 s hold at the end for the end screen
+export const REST_SHOTS = resolveShots(TL, SPECS, TL.parts[3].a, TL.totalFrames + 300); // 10 s hold at the end for the end screen
 export const REST_START = REST_SHOTS[0].a;
 export const REST_LINES = TL.lines(TL.parts[3].a, TL.words.length - 1);
 export const REST_HI = ["Dave", "Dave's", "Owen", "structural", "rent", "half", "1981", "15-year", "30-year", "productivity", "redirected",

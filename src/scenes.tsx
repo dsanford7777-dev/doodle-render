@@ -5,35 +5,34 @@ import { Sequence, useCurrentFrame } from "remotion";
 import {
   Paper, Cam, Svg, Guy, Ink, Box, Oval, Txt, PopG, Stamp, QuoteCard, Tag, BigNum, Swarm, Icon, Bubble, Dash, Dave, Sfx,
   COL, KEY, HAND2, k, ease, easeOut, lerp, money, clamp01,
-} from "../kit";
-import { TL } from "./edit";
+} from "./kit";
 
 export type Item = { k: string; w?: string; [key: string]: any };
 export type ShotSpec = { at: string; tone?: string; zoom?: number; dx?: number; items: Item[] };
-export type Shot = ShotSpec & { a: number; b: number; i0: number };
+export type Shot = ShotSpec & { a: number; b: number; i0: number; tl: any };
 
-const startOf = (phrase: string, after: number) => {
+const startOf = (TL: any, phrase: string, after: number) => {
   const i = TL.find(phrase, after);
   if (i < 0) throw new Error("phrase not found: " + phrase);
   return i;
 };
 
 /** resolve shot specs into absolute frames: each shot runs from its phrase to the next shot's phrase */
-export function resolveShots(specs: ShotSpec[], afterIdx: number, endFrame: number): Shot[] {
+export function resolveShots(TL: any, specs: ShotSpec[], afterIdx: number, endFrame: number): Shot[] {
   let cur = afterIdx;
-  const idxs = specs.map((s) => { cur = startOf(s.at, cur); return cur++; });
+  const idxs = specs.map((s) => { cur = startOf(TL, s.at, cur); return cur++; });
   const out = specs.map((s, n) => ({
-    ...s, i0: idxs[n],
+    ...s, i0: idxs[n], tl: TL,
     a: TL.startF(idxs[n]) - 4,
     b: n + 1 < specs.length ? TL.startF(idxs[n + 1]) - 4 : endFrame,
   }));
   // validate every item phrase now, so a typo fails the build instead of silently showing nothing
-  out.forEach((s) => s.items.forEach((it) => { if (it.w) startOf(it.w, s.i0); (it.items ?? []).forEach((x: any) => x.w && startOf(x.w, s.i0)); (it.bars ?? []).forEach((x: any) => x.w && startOf(x.w, s.i0)); }));
+  out.forEach((s) => s.items.forEach((it) => { for (const w of [it.w, it.split, it.prod, it.pay, it.until, it.cross, it.drop, ...(it.items ?? []).map((x: any) => x.w), ...(it.bars ?? []).map((x: any) => x.w), ...(it.points ?? []).map((x: any) => x.w), ...((it.poses ?? it.arms ?? []).map((x: any) => x[0]))]) if (w) startOf(TL, w, s.i0); }));
   return out;
 }
 
 /** absolute frame of an item phrase inside a shot (or shot start + 6) */
-const when = (s: Shot, w?: string, plus = 0) => (w ? TL.startF(startOf(w, s.i0)) : s.a + 8) + plus;
+const when = (s: Shot, w?: string, plus = 0) => (w ? s.tl.startF(startOf(s.tl, w, s.i0)) : s.a + 8) + plus;
 
 // ── props ────────────────────────────────────────────────────────────────────────────────────────
 export const Prop: React.FC<{ kind: string; x: number; y: number; s?: number; seed?: number; label?: string }> = ({ kind, x, y, s = 1, seed = 400, label }) => {
@@ -184,6 +183,51 @@ export const Prop: React.FC<{ kind: string; x: number; y: number; s?: number; se
       case "comment": return (<g>
         <Oval cx={-330} cy={-30} rx={44} ry={44} fill="#b7c4d6" seed={seed} sw={5} />
         <Box x={-270} y={-90} w={640} h={150} r={22} fill="#fff" seed={seed + 1} sw={6} /></g>);
+      case "avocado": return (<g>
+        <Ink pts={[[-150, -30], [150, -30], [130, 20], [-130, 20]]} closed fill="#d9a066" seed={seed} />
+        <Ink pts={[[-120, -40], [-60, -90], [60, -95], [120, -40]]} closed fill="#a6d16b" seed={seed + 1} />
+        {[-70, 0, 70].map((cx, i) => <Oval key={i} cx={cx} cy={-62} rx={20} ry={12} fill="#7fae46" seed={seed + 2 + i} sw={3} />)}
+        <Txt x={0} y={80} size={40} col={COL.red}>{label ?? ""}</Txt></g>);
+      case "mail": return (<g>
+        <Box x={-160} y={-110} w={320} h={210} r={10} fill="#fffdf3" seed={seed} />
+        <Ink pts={[[-160, -105], [0, 10], [160, -105]]} sw={6} seed={seed + 1} />
+        <Box x={80} y={-95} w={56} h={48} r={4} fill={COL.red} seed={seed + 2} sw={4} />
+        <Txt x={0} y={80} size={30} font={HAND2}>{label ?? "SURVEY"}</Txt></g>);
+      case "gavel": return (<g>
+        <g transform="rotate(-30)"><Box x={-110} y={-60} w={220} h={90} r={16} fill="#8a5a3a" seed={seed} />
+        <Box x={-14} y={30} w={28} h={200} r={8} fill="#a06c46" seed={seed + 1} sw={5} /></g>
+        <Box x={-150} y={170} w={300} h={50} r={10} fill="#6b4226" seed={seed + 2} /></g>);
+      case "duplex": return (<g>
+        <Box x={-220} y={-260} w={440} h={260} r={8} fill="#cfe0f0" seed={seed} />
+        <Ink pts={[[-250, -250], [0, -400], [250, -250]]} closed fill="#5b7fb0" seed={seed + 1} />
+        <Ink pts={[[0, -260], [0, 0]]} sw={6} seed={seed + 2} />
+        {[-150, 80].map((x0, i) => <g key={i}><Box x={x0} y={-210} w={70} h={60} r={5} fill="#fff" seed={seed + 3 + i} sw={4} /><Box x={x0 + 10} y={-110} w={56} h={110} r={5} fill="#8a5a3a" seed={seed + 6 + i} sw={4} /></g>)}</g>);
+      case "person": return (<g>
+        <Ink pts={[[-14, -100], [-18, 0]]} sw={12} col="#3b3f4a" seed={seed} /><Ink pts={[[14, -100], [18, 0]]} sw={12} col="#3b3f4a" seed={seed + 1} />
+        <Ink pts={[[-50, -110], [-44, -230], [44, -230], [50, -110]]} closed fill={label === "boomer" ? "#7d5ba6" : "#4f9d8a"} seed={seed + 2} sw={6} />
+        <Oval cx={0} cy={-280} rx={46} ry={50} fill={COL.skin} seed={seed + 3} sw={6} />
+        <Ink pts={[[-46, -290], [-40, -330], [0, -340], [40, -330], [46, -290], [20, -318], [-20, -318]]} closed fill={label === "boomer" ? "#d8d8d8" : "#4a3326"} seed={seed + 4} sw={5} />
+        <Oval cx={-16} cy={-282} rx={5} ry={6} fill={COL.ink} seed={seed + 5} sw={1} /><Oval cx={16} cy={-282} rx={5} ry={6} fill={COL.ink} seed={seed + 6} sw={1} />
+        <Ink pts={[[-14, -258], [0, -252], [14, -258]]} sw={4} seed={seed + 7} /></g>);
+      case "will": return (<g>
+        <Box x={-130} y={-170} w={260} h={340} r={8} fill="#fffdf3" seed={seed} />
+        <Txt x={0} y={-110} size={34}>INHERITANCE</Txt>
+        {[0, 1, 2].map((i) => <Ink key={i} pts={[[-90, -60 + i * 45], [90, -58 + i * 45]]} sw={3} col="#aaa" seed={seed + 1 + i} />)}
+        <Oval cx={70} cy={120} rx={34} ry={34} fill={COL.red} seed={seed + 5} sw={4} /></g>);
+      case "treadmill": return (<g>
+        <Ink pts={[[-220, 0], [200, -40]]} sw={30} col="#3b3f4a" seed={seed} />
+        <Ink pts={[[160, -40], [200, -260], [150, -270]]} sw={12} seed={seed + 1} />
+        <Ink pts={[[-210, 10], [-210, 40]]} sw={10} seed={seed + 2} /><Ink pts={[[190, -30], [190, 40]]} sw={10} seed={seed + 3} /></g>);
+      case "key": return (<g>
+        <Oval cx={-100} cy={0} rx={60} ry={60} fill={KEY} seed={seed} sw={7} />
+        <Oval cx={-100} cy={0} rx={20} ry={20} fill={COL.paper} seed={seed + 1} sw={5} />
+        <Box x={-45} y={-14} w={200} h={28} r={6} fill={KEY} seed={seed + 2} sw={6} />
+        <Box x={110} y={10} w={20} h={40} r={4} fill={KEY} seed={seed + 3} sw={5} /><Box x={70} y={10} w={20} h={30} r={4} fill={KEY} seed={seed + 4} sw={5} /></g>);
+      case "map": return (<g>
+        <Box x={-260} y={-180} w={520} h={360} r={14} fill="#e8f0d8" seed={seed} />
+        {Array.from({ length: 12 }, (_, i) => <Box key={i} x={-230 + (i % 4) * 120} y={-150 + Math.floor(i / 4) * 110} w={100} h={90} r={6}
+          fill={i < 9 ? "#f4d9a8" : "#9fb3d1"} seed={seed + 1 + i} sw={4} />)}
+        <Txt x={0} y={225} size={34} font={HAND2}>{label ?? ""}</Txt></g>);
       default: return <Oval cx={0} cy={0} rx={40} ry={40} fill={COL.paper} seed={seed} />;
     }
   })();
@@ -311,6 +355,26 @@ const ItemView: React.FC<{ s: Shot; it: Item; g: number; n: number }> = ({ s, it
             );
           })}
           {it.line && g >= when(s, it.line.w) && <Dash x1={it.x - 50} x2={it.x + it.bars.length * (it.gap ?? 260) - 110} y={base - (it.line.v / max) * H} col={it.line.col ?? COL.green} seed={470 + n} />}
+        </g>);
+    }
+    case "line": {
+      // points: [{label, v, w?}] revealed one by one (w = narration phrase) or all from `at`
+      const W = it.wd ?? 1200, H = it.h ?? 420, X0 = it.x ?? 360, Y0 = it.y ?? 760, lo = it.min ?? 0, hi = it.max;
+      const pts = it.points.map((p: any, i: number) => ({ ...p, t: p.w ? when(s, p.w, p.plus ?? 0) : at + i * 6,
+        px: X0 + (i / Math.max(1, it.points.length - 1)) * W, py: Y0 - ((p.v - lo) / (hi - lo)) * H }));
+      if (g < at) return null;
+      const shown = pts.filter((p: any) => g >= p.t);
+      return (
+        <g opacity={clamp01((g - at) / 6)}>
+          <Ink pts={[[X0 - 30, Y0], [X0 + W + 30, Y0]]} sw={6} seed={600 + n} />
+          {pts.map((p: any, i: number) => <Txt key={i} x={p.px} y={Y0 + 50} size={it.ls ?? 32} font={HAND2}>{p.label}</Txt>)}
+          {shown.length > 1 && <Ink pts={shown.map((p: any) => [p.px, p.py])} sw={10} col={it.col ?? COL.red} seed={610 + n} />}
+          {shown.map((p: any, i: number) => (
+            <g key={i}>
+              <Oval cx={p.px} cy={p.py} rx={12} ry={12} fill={it.col ?? COL.red} seed={620 + n + i} sw={4} />
+              {(it.labels ?? true) && <Txt x={p.px} y={p.py - 28} size={it.vs ?? 44} col={it.col ?? COL.red}>{(it.pre ?? "") + p.v + (it.post ?? "")}</Txt>}
+            </g>
+          ))}
         </g>);
     }
     case "epi": return <EpiChart g={g} at={at} splitAt={when(s, it.split)} prodAt={it.prod ? when(s, it.prod) : 1e9} payAt={it.pay ? when(s, it.pay) : 1e9} x={it.x ?? 380} y={it.y ?? 760} />;

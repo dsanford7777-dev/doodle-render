@@ -6,7 +6,7 @@ import { TL, NARRATION } from "./edit";
 import { RamseyHook, HOOK_FRAMES } from "./Hook";
 import { RamseyMath, MATH_FRAMES } from "./Math";
 import { REST_SHOTS, REST_LINES, REST_HI } from "./Rest";
-import { ShotsTrack } from "./scenes";
+import { ShotsTrack } from "../scenes";
 
 const MATH_END = HOOK_FRAMES + MATH_FRAMES;
 // close any gap between the maths and the first "rest" shot

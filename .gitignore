@@ -2,6 +2,7 @@ node_modules
 out/
 # Files decrypted from secure/ at render time (never committed)
 public/ramsey/
+public/age40/
 public/sfx/beep.mp3
 public/sfx/boing.mp3
 public/sfx/bounce_up.mp3
