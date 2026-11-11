@@ -35,7 +35,7 @@ export function resolveShots(TL: any, specs: ShotSpec[], afterIdx: number, endFr
 const when = (s: Shot, w?: string, plus = 0) => (w ? s.tl.startF(startOf(s.tl, w, s.i0)) : s.a + 8) + plus;
 
 // ── props ────────────────────────────────────────────────────────────────────────────────────────
-export const Prop: React.FC<{ kind: string; x: number; y: number; s?: number; seed?: number; label?: string }> = ({ kind, x, y, s = 1, seed = 400, label }) => {
+export const Prop: React.FC<{ kind: string; x: number; y: number; s?: number; seed?: number; label?: string; sub?: string; ghost?: boolean }> = ({ kind, x, y, s = 1, seed = 400, label, sub, ghost }) => {
   const P = (() => {
     switch (kind) {
       case "house": return (<g>
@@ -270,6 +270,25 @@ export const Prop: React.FC<{ kind: string; x: number; y: number; s?: number; se
         <Box x={-110} y={-320} w={130} h={140} r={6} fill="#e8a33c" seed={seed + 4} sw={5} />
         <Box x={40} y={-290} w={130} h={110} r={6} fill="#fff" seed={seed + 5} sw={5} />
         <Txt x={105} y={-228} size={24} font={HAND2}>store</Txt><Txt x={105} y={-200} size={24} font={HAND2}>brand</Txt></g>);
+      case "pack": return (<g>
+        {ghost && <Ink pts={[[-150, 0], [-150, -440], [150, -440], [150, 0]]} sw={5} col="#9a9a9a" seed={seed + 9} />}
+        {ghost && Array.from({ length: 10 }, (_, i) => <Box key={i} x={-150 + (i % 2) * 290} y={-440 + i * 44} w={10} h={22} r={2} fill={COL.paper} seed={seed + 30 + i} sw={0} />)}
+        <Box x={-130} y={-380} w={260} h={380} r={8} fill="#f2c14e" seed={seed} />
+        <Box x={-100} y={-330} w={200} h={110} r={8} fill="#fff" seed={seed + 1} sw={5} />
+        <Txt x={0} y={-262} size={label && label.length > 8 ? 34 : 46}>{label ?? "CEREAL"}</Txt>
+        <Oval cx={0} cy={-140} rx={70} ry={50} fill="#d9662b" seed={seed + 2} sw={5} />
+        <Txt x={0} y={-30} size={36} font={HAND2}>{sub ?? ""}</Txt></g>);
+      case "roll": return (<g>
+        <Box x={-110} y={-300} w={220} h={300} r={30} fill="#fff" seed={seed} />
+        <Oval cx={0} cy={-300} rx={110} ry={34} fill="#f4f4f4" seed={seed + 1} sw={6} />
+        <Oval cx={0} cy={-300} rx={36} ry={12} fill="#c9a77a" seed={seed + 2} sw={4} />
+        <Ink pts={[[110, -60], [190, -20], [190, 40], [100, 10]]} closed fill="#fff" seed={seed + 3} sw={5} />
+        <Txt x={0} y={-130} size={44}>{label ?? ""}</Txt></g>);
+      case "shelftag": return (<g>
+        <Box x={-260} y={-190} w={520} h={260} r={12} fill="#fff7c2" seed={seed} sw={8} />
+        <Txt x={-20} y={-60} size={120} col={COL.red}>{label ?? "PRICE"}</Txt>
+        <Ink pts={[[-230, 0], [230, 2]]} sw={3} col="#aaa" seed={seed + 1} />
+        <Txt x={-226} y={44} size={30} anchor="start" font={HAND2} col="#555">{sub ?? "unit price: per oz"}</Txt></g>);
       case "map": return (<g>
         <Box x={-260} y={-180} w={520} h={360} r={14} fill="#e8f0d8" seed={seed} />
         {Array.from({ length: 12 }, (_, i) => <Box key={i} x={-230 + (i % 4) * 120} y={-150 + Math.floor(i / 4) * 110} w={100} h={90} r={6}
@@ -349,7 +368,7 @@ const ItemView: React.FC<{ s: Shot; it: Item; g: number; n: number }> = ({ s, it
     case "bubble": return <Bubble t={g} at={at} x={it.x} y={it.y} w={it.wd} lines={it.lines} tx={it.tx} ty={it.ty} size={it.size ?? 52} />;
     case "prop": return (
       <PopG t={g} at={at} x={it.x} y={it.y - 100} r={it.r ?? 0}>
-        <Prop kind={it.kind} x={it.x} y={it.y} s={it.s ?? 1} seed={400 + n * 31} label={it.label} />
+        <Prop kind={it.kind} x={it.x} y={it.y} s={it.s ?? 1} seed={400 + n * 31} label={it.label} sub={it.sub} ghost={it.ghost} />
         {it.cross && g >= when(s, it.cross) && <g opacity={clamp01((g - when(s, it.cross)) / 5)}>
           <Ink pts={[[it.x - 150 * (it.s ?? 1), it.y - 300 * (it.s ?? 1)], [it.x + 150 * (it.s ?? 1), it.y + 10]]} sw={16} col={COL.red} seed={480 + n} />
           <Ink pts={[[it.x + 150 * (it.s ?? 1), it.y - 300 * (it.s ?? 1)], [it.x - 150 * (it.s ?? 1), it.y + 10]]} sw={16} col={COL.red} seed={481 + n} /></g>}
