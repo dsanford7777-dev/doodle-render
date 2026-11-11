@@ -35,7 +35,7 @@ export function resolveShots(TL: any, specs: ShotSpec[], afterIdx: number, endFr
 const when = (s: Shot, w?: string, plus = 0) => (w ? s.tl.startF(startOf(s.tl, w, s.i0)) : s.a + 8) + plus;
 
 // ── props ────────────────────────────────────────────────────────────────────────────────────────
-export const Prop: React.FC<{ kind: string; x: number; y: number; s?: number; seed?: number; label?: string }> = ({ kind, x, y, s = 1, seed = 400, label }) => {
+export const Prop: React.FC<{ kind: string; x: number; y: number; s?: number; seed?: number; label?: string; sub?: string; ghost?: boolean }> = ({ kind, x, y, s = 1, seed = 400, label, sub, ghost }) => {
   const P = (() => {
     switch (kind) {
       case "house": return (<g>
@@ -223,6 +223,72 @@ export const Prop: React.FC<{ kind: string; x: number; y: number; s?: number; se
         <Oval cx={-100} cy={0} rx={20} ry={20} fill={COL.paper} seed={seed + 1} sw={5} />
         <Box x={-45} y={-14} w={200} h={28} r={6} fill={KEY} seed={seed + 2} sw={6} />
         <Box x={110} y={10} w={20} h={40} r={4} fill={KEY} seed={seed + 3} sw={5} /><Box x={70} y={10} w={20} h={30} r={4} fill={KEY} seed={seed + 4} sw={5} /></g>);
+      case "factory": return (<g>
+        <Box x={-240} y={-200} w={480} h={200} r={6} fill="#c98f6b" seed={seed} />
+        <Ink pts={[[-240, -200], [-160, -270], [-160, -200], [-80, -270], [-80, -200], [0, -270], [0, -200]]} closed fill="#b07a58" seed={seed + 1} />
+        <Box x={90} y={-380} w={60} h={180} r={4} fill="#8a8f99" seed={seed + 2} sw={6} />
+        <Box x={170} y={-330} w={50} h={130} r={4} fill="#8a8f99" seed={seed + 3} sw={6} />
+        {[0, 1].map((i) => <Oval key={i} cx={130 + i * 70} cy={-420 + i * 40 - ((seed % 7) * 2)} rx={46 - i * 8} ry={28 - i * 4} fill="#e4e4e4" seed={seed + 4 + i} sw={4} />)}
+        {[-190, -110, -30].map((cx, i) => <Box key={i} x={cx} y={-150} w={60} h={50} r={4} fill="#bfe3f2" seed={seed + 7 + i} sw={4} />)}
+        <Box x={50} y={-110} w={80} h={110} r={6} fill="#6b4226" seed={seed + 11} sw={5} />
+        <Txt x={0} y={50} size={34} font={HAND2}>{label ?? ""}</Txt></g>);
+      case "paycheck": return (<g>
+        <Box x={-230} y={-110} w={460} h={220} r={10} fill="#e7f4e4" seed={seed} />
+        <Txt x={-200} y={-55} size={30} anchor="start" font={HAND2}>PAY TO THE ORDER OF</Txt>
+        <Ink pts={[[-200, -20], [60, -18]]} sw={3} col="#999" seed={seed + 1} />
+        <Box x={90} y={-60} w={120} h={56} r={6} fill="#fff" seed={seed + 2} sw={4} />
+        <Txt x={0} y={60} size={54} col={COL.green}>{label ?? ""}</Txt>
+        <Ink pts={[[60, 90], [200, 86]]} sw={3} col="#999" seed={seed + 3} /></g>);
+      case "robot": return (<g>
+        <Box x={-110} y={-40} w={220} h={40} r={8} fill="#8a8f99" seed={seed} />
+        <Ink pts={[[0, -40], [-40, -200], [90, -290]]} sw={34} col="#f59e0b" seed={seed + 1} />
+        <Oval cx={-40} cy={-200} rx={26} ry={26} fill="#555a66" seed={seed + 2} sw={5} />
+        <Oval cx={0} cy={-40} rx={30} ry={22} fill="#555a66" seed={seed + 3} sw={5} />
+        <Ink pts={[[90, -290], [140, -320]]} sw={10} seed={seed + 4} /><Ink pts={[[90, -290], [140, -260]]} sw={10} seed={seed + 5} /></g>);
+      case "hardhat": return (<g>
+        <Ink pts={[[-130, 0], [-110, -90], [-40, -140], [40, -140], [110, -90], [130, 0]]} closed fill="#f5c518" seed={seed} sw={8} />
+        <Box x={-170} y={-10} w={340} h={40} r={16} fill="#f5c518" seed={seed + 1} sw={7} />
+        <Ink pts={[[0, -138], [0, -10]]} sw={7} col="#c99a00" seed={seed + 2} /></g>);
+      case "lease": return (<g transform="rotate(-4)">
+        <Box x={-150} y={-200} w={300} h={400} r={8} fill="#fffdf3" seed={seed} />
+        <Txt x={0} y={-140} size={44}>LEASE</Txt>
+        {[0, 1, 2].map((i) => <Ink key={i} pts={[[-110, -90 + i * 40], [110, -88 + i * 40]]} sw={3} col="#aaa" seed={seed + 1 + i} />)}
+        {Array.from({ length: 12 }, (_, i) => <Box key={i} x={-120 + (i % 4) * 34} y={40 + Math.floor(i / 4) * 34} w={28} h={28} r={3} fill={i < 12 ? "#e8eef6" : "#fff"} seed={seed + 5 + i} sw={2} />)}
+        <Ink pts={[[30, 150], [120, 146]]} sw={4} seed={seed + 20} /><Txt x={75} y={180} size={22} font={HAND2}>sign here</Txt></g>);
+      case "piggy": return (<g>
+        <Oval cx={0} cy={-120} rx={170} ry={120} fill="#f7b7c3" seed={seed} sw={8} />
+        <Oval cx={160} cy={-130} rx={40} ry={34} fill="#f19aaa" seed={seed + 1} sw={6} />
+        <Ink pts={[[-60, -235], [-30, -275], [0, -230]]} closed fill="#f19aaa" seed={seed + 2} sw={6} />
+        {[-100, -30, 50, 110].map((x0, i) => <Box key={i} x={x0 - 16} y={-20} w={32} h={50} r={8} fill="#f7b7c3" seed={seed + 3 + i} sw={6} />)}
+        <Box x={-50} y={-238} w={100} h={14} r={6} fill="#5a3a3a" seed={seed + 8} sw={3} />
+        <Oval cx={90} cy={-150} rx={8} ry={8} fill={COL.ink} seed={seed + 9} sw={1} />
+        {label === "empty" ? <Icon kind="coin" x={-20} y={-80} s={0.7} seed={seed + 10} /> : null}</g>);
+      case "cart": return (<g>
+        <Ink pts={[[-230, -260], [-180, -260], [-130, -60], [170, -60], [210, -200], [-160, -200]]} sw={10} seed={seed} />
+        <Ink pts={[[-130, -60], [-150, -20], [180, -20]]} sw={8} seed={seed + 1} />
+        <Oval cx={-110} cy={10} rx={24} ry={24} fill="#555" seed={seed + 2} sw={5} /><Oval cx={150} cy={10} rx={24} ry={24} fill="#555" seed={seed + 3} sw={5} />
+        <Box x={-110} y={-320} w={130} h={140} r={6} fill="#e8a33c" seed={seed + 4} sw={5} />
+        <Box x={40} y={-290} w={130} h={110} r={6} fill="#fff" seed={seed + 5} sw={5} />
+        <Txt x={105} y={-228} size={24} font={HAND2}>store</Txt><Txt x={105} y={-200} size={24} font={HAND2}>brand</Txt></g>);
+      case "pack": return (<g>
+        {ghost && <Ink pts={[[-150, 0], [-150, -440], [150, -440], [150, 0]]} sw={5} col="#9a9a9a" seed={seed + 9} />}
+        {ghost && Array.from({ length: 10 }, (_, i) => <Box key={i} x={-150 + (i % 2) * 290} y={-440 + i * 44} w={10} h={22} r={2} fill={COL.paper} seed={seed + 30 + i} sw={0} />)}
+        <Box x={-130} y={-380} w={260} h={380} r={8} fill="#f2c14e" seed={seed} />
+        <Box x={-100} y={-330} w={200} h={110} r={8} fill="#fff" seed={seed + 1} sw={5} />
+        <Txt x={0} y={-262} size={label && label.length > 8 ? 34 : 46}>{label ?? "CEREAL"}</Txt>
+        <Oval cx={0} cy={-140} rx={70} ry={50} fill="#d9662b" seed={seed + 2} sw={5} />
+        <Txt x={0} y={-30} size={36} font={HAND2}>{sub ?? ""}</Txt></g>);
+      case "roll": return (<g>
+        <Box x={-110} y={-300} w={220} h={300} r={30} fill="#fff" seed={seed} />
+        <Oval cx={0} cy={-300} rx={110} ry={34} fill="#f4f4f4" seed={seed + 1} sw={6} />
+        <Oval cx={0} cy={-300} rx={36} ry={12} fill="#c9a77a" seed={seed + 2} sw={4} />
+        <Ink pts={[[110, -60], [190, -20], [190, 40], [100, 10]]} closed fill="#fff" seed={seed + 3} sw={5} />
+        <Txt x={0} y={-130} size={44}>{label ?? ""}</Txt></g>);
+      case "shelftag": return (<g>
+        <Box x={-260} y={-190} w={520} h={260} r={12} fill="#fff7c2" seed={seed} sw={8} />
+        <Txt x={-20} y={-60} size={120} col={COL.red}>{label ?? "PRICE"}</Txt>
+        <Ink pts={[[-230, 0], [230, 2]]} sw={3} col="#aaa" seed={seed + 1} />
+        <Txt x={-226} y={44} size={30} anchor="start" font={HAND2} col="#555">{sub ?? "unit price: per oz"}</Txt></g>);
       case "map": return (<g>
         <Box x={-260} y={-180} w={520} h={360} r={14} fill="#e8f0d8" seed={seed} />
         {Array.from({ length: 12 }, (_, i) => <Box key={i} x={-230 + (i % 4) * 120} y={-150 + Math.floor(i / 4) * 110} w={100} h={90} r={6}
@@ -276,7 +342,7 @@ const ItemView: React.FC<{ s: Shot; it: Item; g: number; n: number }> = ({ s, it
     case "guy": {
       let pose = it.pose ?? "idle", expr = it.expr ?? "deadpan";
       for (const [w, p, e] of it.poses ?? []) if (g >= when(s, w)) { pose = p; expr = e; }
-      return g >= at ? <Guy x={it.x} y={it.y} s={it.s ?? 0.7} pose={pose} expr={expr} seed={20 + n} sign={it.sign} /> : null;
+      return g >= at ? <Guy x={it.x} y={it.y} s={it.s ?? 0.7} pose={pose} expr={expr} seed={20 + n} sign={it.sign} hat={it.hat} /> : null;
     }
     case "dave": {
       let arm = it.arm ?? "idle";
@@ -302,7 +368,7 @@ const ItemView: React.FC<{ s: Shot; it: Item; g: number; n: number }> = ({ s, it
     case "bubble": return <Bubble t={g} at={at} x={it.x} y={it.y} w={it.wd} lines={it.lines} tx={it.tx} ty={it.ty} size={it.size ?? 52} />;
     case "prop": return (
       <PopG t={g} at={at} x={it.x} y={it.y - 100} r={it.r ?? 0}>
-        <Prop kind={it.kind} x={it.x} y={it.y} s={it.s ?? 1} seed={400 + n * 31} label={it.label} />
+        <Prop kind={it.kind} x={it.x} y={it.y} s={it.s ?? 1} seed={400 + n * 31} label={it.label} sub={it.sub} ghost={it.ghost} />
         {it.cross && g >= when(s, it.cross) && <g opacity={clamp01((g - when(s, it.cross)) / 5)}>
           <Ink pts={[[it.x - 150 * (it.s ?? 1), it.y - 300 * (it.s ?? 1)], [it.x + 150 * (it.s ?? 1), it.y + 10]]} sw={16} col={COL.red} seed={480 + n} />
           <Ink pts={[[it.x + 150 * (it.s ?? 1), it.y - 300 * (it.s ?? 1)], [it.x - 150 * (it.s ?? 1), it.y + 10]]} sw={16} col={COL.red} seed={481 + n} /></g>}

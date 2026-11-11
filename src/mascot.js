@@ -140,7 +140,7 @@ export const POSES = {
 };
 
 // full character; (x, y) = point between the feet; s = scale
-export function character({ x = 0, y = 0, s = 1, pose = "idle", expr = "deadpan", seed = 3, bob = 0, sign = "-$1,270" } = {}) {
+export function character({ x = 0, y = 0, s = 1, pose = "idle", expr = "deadpan", seed = 3, bob = 0, sign = "-$1,270", hat = "" } = {}) {
   const P = POSES[pose];
   let g = "";
   const hipY = -150, shY = -330, headCy = -480;
@@ -189,6 +189,13 @@ export function character({ x = 0, y = 0, s = 1, pose = "idle", expr = "deadpan"
   });
   g += shape([[-hw / 2 + 4, top + 30], [-hw / 2 + 10, top + 4], [hw / 2 - 10, top + 4], [hw / 2 - 4, top + 30], [-hw / 2 + 4, top + 30]],
     COL.hair, { seed: seed + 99, sw: 0 });
+  if (hat === "hard") {
+    // yellow hard hat: dome over the hair + a brim
+    g += shape([[-hw / 2 + 2, top + 26], [-hw / 2 + 14, top - 34], [-50, top - 70], [0, top - 78], [50, top - 70], [hw / 2 - 14, top - 34], [hw / 2 - 2, top + 26]],
+      "#f5c518", { seed: seed + 110, sw: 7, halo: true });
+    g += shape(rrect(-hw / 2 - 22, top + 14, hw + 44, 26, 12), "#f5c518", { seed: seed + 111, sw: 6 });
+    g += line([[0, top - 76], [0, top + 14]], { seed: seed + 112, sw: 5, col: "#c99a00" });
+  }
   g += face(0, headCy + 5, expr, seed + 100);
   if (pose === "facepalm") g += shape(ell(hr[0], hr[1] + 30, 30, 26), COL.skin, { seed: seed + 77, sw: 6 });
   g += `</g>`;

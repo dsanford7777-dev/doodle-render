@@ -75,12 +75,12 @@ export const Svg: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 export const Raw: React.FC<{ svg: string }> = ({ svg }) => <g dangerouslySetInnerHTML={{ __html: svg }} />;
 
 /** the mascot, boiling */
-export const Guy: React.FC<{ x: number; y: number; s?: number; pose?: string; expr?: string; seed?: number; bob?: boolean; sign?: string }> =
-  ({ x, y, s = 1, pose = "idle", expr = "deadpan", seed = 3, bob = true, sign }) => {
+export const Guy: React.FC<{ x: number; y: number; s?: number; pose?: string; expr?: string; seed?: number; bob?: boolean; sign?: string; hat?: string }> =
+  ({ x, y, s = 1, pose = "idle", expr = "deadpan", seed = 3, bob = true, sign, hat }) => {
     const f = useCurrentFrame();
     const b = useBoil(seed, 4);
     const breathe = bob ? Math.sin(f / 14) * 3 : 0;
-    return <Raw svg={character({ x, y: y + breathe * 0.3, s, pose, expr, seed: b, bob: breathe, sign })} />;
+    return <Raw svg={character({ x, y: y + breathe * 0.3, s, pose, expr, seed: b, bob: breathe, sign, hat })} />;
   };
 
 /** wobbly ink path helpers for scenes */
@@ -226,6 +226,11 @@ export const Icon: React.FC<{ kind: string; x: number; y: number; s?: number; se
   if (kind === "house") return (<g>
     <Box x={x - 22 * s} y={y - 10 * s} w={44 * s} h={34 * s} r={3} fill={col ?? "#f4d9a8"} seed={seed} sw={3} />
     <Ink pts={[[x - 28 * s, y - 8 * s], [x, y - 32 * s], [x + 28 * s, y - 8 * s]]} closed fill={col ? COL.red : "#c9c2b2"} seed={seed + 1} sw={3} /></g>);
+  if (kind === "worker") return (<g>
+    <Ink pts={[[x - 26 * s, y + 40 * s], [x - 22 * s, y + 6 * s], [x + 22 * s, y + 6 * s], [x + 26 * s, y + 40 * s]]} closed fill={col ?? "#4f78b0"} seed={seed} sw={3} />
+    <Oval cx={x} cy={y - 14 * s} rx={18 * s} ry={19 * s} fill={COL.skin} seed={seed + 1} sw={3} />
+    <Ink pts={[[x - 22 * s, y - 20 * s], [x - 16 * s, y - 38 * s], [x, y - 43 * s], [x + 16 * s, y - 38 * s], [x + 22 * s, y - 20 * s]]} closed fill="#f5c518" seed={seed + 2} sw={3} />
+    <Ink pts={[[x - 28 * s, y - 20 * s], [x + 28 * s, y - 20 * s]]} sw={4} col="#c99a00" seed={seed + 3} /></g>);
   if (kind === "coin") return (<g>
     <Oval cx={x} cy={y} rx={30 * s} ry={30 * s} fill={col ?? COL.amber} seed={seed} sw={4} />
     <Txt x={x} y={y + 9 * s} size={22 * s} col={COL.ink}>$75</Txt></g>);
