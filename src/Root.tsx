@@ -12,6 +12,7 @@ import { AmericaThumbA, AmericaThumbB, AmericaThumbC } from "./america/Thumbs";
 import { Paycheck, PAYCHECK_FRAMES } from "./paycheck/Paycheck";
 import { PaycheckThumbA, PaycheckThumbB, PaycheckThumbC } from "./paycheck/Thumbs";
 import { Shrink, SHRINK_FRAMES } from "./shrink/Shrink";
+import { Paycheck2, PAYCHECK2_FRAMES } from "./paycheck2/Paycheck2";
 import { ShrinkThumbA, ShrinkThumbB, ShrinkThumbC } from "./shrink/Thumbs";
 
 // the animated opening so far: hook, then straight into the maths
@@ -48,5 +49,6 @@ export const Root: React.FC = () => (
     <Composition id="ShrinkThumbA" component={ShrinkThumbA} durationInFrames={1} fps={30} width={1920} height={1080} />
     <Composition id="ShrinkThumbB" component={ShrinkThumbB} durationInFrames={1} fps={30} width={1920} height={1080} />
     <Composition id="ShrinkThumbC" component={ShrinkThumbC} durationInFrames={1} fps={30} width={1920} height={1080} />
+    <Composition id="Paycheck2Full" component={Paycheck2} durationInFrames={PAYCHECK2_FRAMES} fps={30} width={1920} height={1080} />
   </>
 );
