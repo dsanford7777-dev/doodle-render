@@ -4,7 +4,7 @@ import { RamseyHook, HOOK_FRAMES } from "./ramsey/Hook";
 import { RamseyMath, MATH_FRAMES } from "./ramsey/Math";
 import { RamseyVoice, VOICE_FRAMES } from "./ramsey/Voice";
 import { RamseyFull, FULL_FRAMES } from "./ramsey/Full";
-import { ThumbA, ThumbB, ThumbC } from "./ramsey/Thumbs";
+import { ThumbA, ThumbB, ThumbC, ThumbD, ThumbE } from "./ramsey/Thumbs";
 import { Age40, AGE40_FRAMES } from "./age40/Age40";
 import { Age40ThumbA, Age40ThumbB, Age40ThumbC } from "./age40/Thumbs";
 import { America, AMERICA_FRAMES } from "./america/America";
@@ -31,6 +31,8 @@ export const Root: React.FC = () => (
     <Composition id="RamseyThumbA" component={ThumbA} durationInFrames={1} fps={30} width={1920} height={1080} />
     <Composition id="RamseyThumbB" component={ThumbB} durationInFrames={1} fps={30} width={1920} height={1080} />
     <Composition id="RamseyThumbC" component={ThumbC} durationInFrames={1} fps={30} width={1920} height={1080} />
+    <Composition id="RamseyThumbD" component={ThumbD} durationInFrames={1} fps={30} width={1920} height={1080} />
+    <Composition id="RamseyThumbE" component={ThumbE} durationInFrames={1} fps={30} width={1920} height={1080} />
     <Composition id="RamseyVoice" component={RamseyVoice} durationInFrames={VOICE_FRAMES} fps={30} width={1920} height={1080} />
     <Composition id="Age40Full" component={Age40} durationInFrames={AGE40_FRAMES} fps={30} width={1920} height={1080} />
     <Composition id="Age40ThumbA" component={Age40ThumbA} durationInFrames={1} fps={30} width={1920} height={1080} />
