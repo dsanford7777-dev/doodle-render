@@ -50,3 +50,23 @@ export const ThumbC: React.FC = () => (
     <Big x={1180} y={350} size={110}>HIS OWN RULE</Big>
   </Svg></Paper></AbsoluteFill>
 );
+
+// D + E (Nov 12): Daniel asked for the drawn Dave front and centre after A got no clicks.
+// Caricature only, no words put in his mouth; the number is the cleared -$1,270/mo shortfall.
+export const ThumbD: React.FC = () => (
+  <AbsoluteFill><Fonts /><Paper tone="#f4efe3"><Svg>
+    <Dave x={520} y={1560} s={2.3} arm="point" />
+    <Big x={1400} y={300} size={170}>DAVE'S PLAN</Big>
+    <Big x={1470} y={620} size={270} col={COL.red}>-$1,270</Big>
+    <Big x={1400} y={860} size={170}>A MONTH</Big>
+  </Svg></Paper></AbsoluteFill>
+);
+
+export const ThumbE: React.FC = () => (
+  <AbsoluteFill><Fonts /><Paper tone="#eef2f6"><Svg>
+    <Dave x={500} y={1560} s={2.3} arm="cash" />
+    <Big x={1400} y={380} size={250}>STILL</Big>
+    <Big x={1400} y={680} size={250} col={COL.red}>WORKS?</Big>
+    <Stamp t={100} at={0} x={1500} y={930} text="2026 PAYCHECK" size={84} r={-4} />
+  </Svg></Paper></AbsoluteFill>
+);
