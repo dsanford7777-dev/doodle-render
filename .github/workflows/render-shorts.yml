@@ -21,7 +21,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - id: p
-        run: echo "matrix=$(node -e "console.log(JSON.stringify({comp: JSON.parse(require('fs').readFileSync('shorts.json','utf8')).compositions}))")" >> "$GITHUB_OUTPUT"
+        run: |
+          echo "matrix=$(node -e "console.log(JSON.stringify({comp: JSON.parse(require('fs').readFileSync('shorts.json','utf8')).compositions}))")" >> "$GITHUB_OUTPUT"
   render:
     needs: plan
     runs-on: ubuntu-latest
