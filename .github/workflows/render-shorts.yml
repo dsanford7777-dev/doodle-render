@@ -1,0 +1,67 @@
+name: Render Shorts
+# Push shorts.json ({"compositions": ["ShortRamsey1", ...]}) on any branch and this renders each vertical
+# Short in one pass (picture + its own soundtrack), one job per Short, in parallel. Shorts reuse the long
+# videos' narration from secure/, so nothing is voiced again. Each finished MP4 is kept encrypted as a
+# 3-day artifact named short-<composition>; the private repo downloads and decrypts it.
+on:
+  workflow_dispatch:
+  push:
+    paths: [shorts.json]
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: render-shorts-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.p.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: p
+        run: echo "matrix=$(node -e "console.log(JSON.stringify({comp: JSON.parse(require('fs').readFileSync('shorts.json','utf8')).compositions}))")" >> "$GITHUB_OUTPUT"
+  render:
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.plan.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - name: Unlock private assets
+        env: { ASSET_KEY: "${{ secrets.ASSET_KEY }}" }
+        run: |
+          [ -n "$ASSET_KEY" ] || { echo "::error::ASSET_KEY secret is missing (Settings > Secrets and variables > Actions)"; exit 1; }
+          for f in secure/*.tar.enc; do
+            case "$f" in secure/sfx-*) dest=public/sfx ;; *) dest=public ;; esac
+            mkdir -p "$dest"
+            openssl enc -d -aes-256-cbc -pbkdf2 -pass env:ASSET_KEY -in "$f" | tar -xf - -C "$dest"
+          done
+      - name: Render ${{ matrix.comp }}
+        env: { ASSET_KEY: "${{ secrets.ASSET_KEY }}" }
+        run: |
+          set -o pipefail
+          npx remotion render src/index.ts "${{ matrix.comp }}" video.mp4 --concurrency=4 \
+            --codec=h264 --crf=16 --audio-bitrate=256k --timeout=600000 2>&1 | tail -6
+          sudo apt-get -qq update >/dev/null && sudo apt-get -qq install -y ffmpeg >/dev/null
+          SIZE=$(ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=p=0 video.mp4)
+          SOUND=$(ffprobe -v error -select_streams a:0 -show_entries stream=duration -of csv=p=0 video.mp4)
+          LEN=$(ffprobe -v error -show_entries format=duration -of csv=p=0 video.mp4)
+          { echo "## Short: ${{ matrix.comp }}"; echo "- Size: $SIZE"; echo "- Length: ${LEN}s"; echo "- Audio track: ${SOUND}s"; } | tee report.md >> $GITHUB_STEP_SUMMARY
+          [ "$SIZE" = "1080,1920" ] || { echo "::error::not vertical 1080x1920 ($SIZE)"; exit 1; }
+          [ -n "$SOUND" ] || { echo "::error::the Short has no audio track"; exit 1; }
+          # the artifact is downloadable by any signed-in GitHub user, so it is encrypted with the same key
+          openssl enc -aes-256-cbc -pbkdf2 -salt -pass env:ASSET_KEY -in video.mp4 -out "${{ matrix.comp }}.mp4.enc"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: short-${{ matrix.comp }}
+          path: |
+            ${{ matrix.comp }}.mp4.enc
+            report.md
+          retention-days: 3

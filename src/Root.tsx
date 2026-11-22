@@ -14,6 +14,11 @@ import { PaycheckThumbA, PaycheckThumbB, PaycheckThumbC } from "./paycheck/Thumb
 import { Shrink, SHRINK_FRAMES } from "./shrink/Shrink";
 import { Paycheck2, PAYCHECK2_FRAMES } from "./paycheck2/Paycheck2";
 import { ShrinkThumbA, ShrinkThumbB, ShrinkThumbC } from "./shrink/Thumbs";
+import { makeShort, SHORT_W, SHORT_H } from "./shorts/Short";
+import { DEFS } from "./shorts/defs";
+
+// vertical Shorts cut from the long videos' existing narration
+const SHORTS = DEFS.map((d) => ({ id: d.id, ...makeShort(d) }));
 
 // the animated opening so far: hook, then straight into the maths
 const RamseyOpening: React.FC = () => (
@@ -52,5 +57,6 @@ export const Root: React.FC = () => (
     <Composition id="ShrinkThumbB" component={ShrinkThumbB} durationInFrames={1} fps={30} width={1920} height={1080} />
     <Composition id="ShrinkThumbC" component={ShrinkThumbC} durationInFrames={1} fps={30} width={1920} height={1080} />
     <Composition id="Paycheck2Full" component={Paycheck2} durationInFrames={PAYCHECK2_FRAMES} fps={30} width={1920} height={1080} />
+    {SHORTS.map((s) => <Composition key={s.id} id={s.id} component={s.Comp} durationInFrames={s.frames} fps={30} width={SHORT_W} height={SHORT_H} />)}
   </>
 );

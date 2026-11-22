@@ -2,7 +2,7 @@
 // under a moving camera, things pop in on the narration's words, and the line work "boils" (re-seeded
 // every few frames) so even still frames feel hand-drawn. 1920x1080 @ 30 fps; captions own y > 860.
 import React from "react";
-import { AbsoluteFill, Audio, Sequence, staticFile, useCurrentFrame } from "remotion";
+import { AbsoluteFill, Audio, Sequence, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 // @ts-ignore
 import { character, wob, ell, rrect, COL } from "./mascot.js";
 
@@ -37,16 +37,19 @@ export const money = (n: number) => (n < 0 ? "-" : "") + "$" + Math.abs(n).toLoc
 export const useBoil = (base = 1, every = 3) => base + Math.floor(useCurrentFrame() / every) * 7;
 
 /** paper background with soft vignette and fibre */
-export const Paper: React.FC<{ tone?: string; children?: React.ReactNode }> = ({ tone = "#f4efe3", children }) => (
+export const Paper: React.FC<{ tone?: string; children?: React.ReactNode }> = ({ tone = "#f4efe3", children }) => {
+  const { width, height } = useVideoConfig(); // 1920x1080 long-form, 1080x1920 Shorts
+  return (
   <AbsoluteFill style={{ background: tone }}>
     <AbsoluteFill style={{ background: "radial-gradient(ellipse at 50% 42%, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0) 55%, rgba(40,40,60,0.18) 100%)" }} />
-    <svg width={1920} height={1080} style={{ position: "absolute", opacity: 0.12, mixBlendMode: "multiply" }}>
+    <svg width={width} height={height} style={{ position: "absolute", opacity: 0.12, mixBlendMode: "multiply" }}>
       <filter id="fib"><feTurbulence type="fractalNoise" baseFrequency="0.85 0.05" numOctaves={2} seed={4} /><feColorMatrix values="0 0 0 0 0.2  0 0 0 0 0.2  0 0 0 0 0.3  0 0 0 0.9 0" /></filter>
-      <rect width={1920} height={1080} filter="url(#fib)" />
+      <rect width={width} height={height} filter="url(#fib)" />
     </svg>
     {children}
   </AbsoluteFill>
-);
+  );
+};
 
 /** camera: push/pull + drift over the shot; layers inside can add parallax with <Layer depth> */
 export const CamCtx = React.createContext({ u: 0, dx: 0, dy: 0 });
@@ -69,9 +72,10 @@ export const Layer: React.FC<{ depth: number; children: React.ReactNode }> = ({ 
 };
 
 /** whole-frame svg */
-export const Svg: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <svg width={1920} height={1080} viewBox="0 0 1920 1080" style={{ position: "absolute", overflow: "visible" }}>{children}</svg>
-);
+export const Svg: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { width, height } = useVideoConfig();
+  return <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} style={{ position: "absolute", overflow: "visible" }}>{children}</svg>;
+};
 export const Raw: React.FC<{ svg: string }> = ({ svg }) => <g dangerouslySetInnerHTML={{ __html: svg }} />;
 
 /** the mascot, boiling */
@@ -110,9 +114,9 @@ export const PopG: React.FC<{ t: number; at: number; x: number; y: number; r?: n
   };
 
 /** quote card: exact words, speaker, outlet, date */
-export const QuoteCard: React.FC<{ t: number; at?: number; quote: string[]; who: string; src: string; x?: number; y?: number; size?: number }> =
-  ({ t, at = 0, quote, who, src, x = 960, y = 420, size = 92 }) => {
-    const w = 1500, h = 150 + quote.length * size * 1.1 + 110;
+export const QuoteCard: React.FC<{ t: number; at?: number; quote: string[]; who: string; src: string; x?: number; y?: number; size?: number; wd?: number }> =
+  ({ t, at = 0, quote, who, src, x = 960, y = 420, size = 92, wd = 1500 }) => {
+    const w = wd, h = 150 + quote.length * size * 1.1 + 110;
     return (
       <PopG t={t} at={at} x={x} y={y} r={-2}>
         <Box x={x - w / 2} y={y - h / 2} w={w} h={h} r={22} fill={COL.paper} seed={11} sw={9} />
@@ -143,13 +147,14 @@ export const Stamp: React.FC<{ t: number; at: number; x: number; y: number; text
 /** caption: dark box under the picture, the line being spoken; money/numbers and any `hi` words in yellow */
 export const KEY = "#ffd23f";
 const norm = (w: string) => w.toLowerCase().replace(/[^a-z0-9$%]/g, "");
-export const Caption: React.FC<{ t: number; words: { w: string; at: number }[]; hi?: string[] }> = ({ t, words, hi = [] }) => {
+export type CapStyle = { bottom?: number; maxWidth?: number; size?: number };
+export const Caption: React.FC<{ t: number; words: { w: string; at: number }[]; hi?: string[]; st?: CapStyle }> = ({ t, words, hi = [], st = {} }) => {
   if (!words.length) return null;
   const H = new Set(hi.map(norm));
   return (
-    <div style={{ position: "absolute", left: 0, right: 0, bottom: 64, display: "flex", justifyContent: "center" }}>
-      <div style={{ maxWidth: 1500, padding: "14px 34px 18px", borderRadius: 18, background: "rgba(14,17,24,0.9)",
-        boxShadow: "0 6px 0 rgba(0,0,0,0.25)", textAlign: "center", fontFamily: HAND, fontWeight: 700, fontSize: 56, lineHeight: 1.18, color: "#fff" }}>
+    <div style={{ position: "absolute", left: 0, right: 0, bottom: st.bottom ?? 64, display: "flex", justifyContent: "center" }}>
+      <div style={{ maxWidth: st.maxWidth ?? 1500, padding: "14px 34px 18px", borderRadius: 18, background: "rgba(14,17,24,0.9)",
+        boxShadow: "0 6px 0 rgba(0,0,0,0.25)", textAlign: "center", fontFamily: HAND, fontWeight: 700, fontSize: st.size ?? 56, lineHeight: 1.18, color: "#fff" }}>
         {words.map((x, i) => {
           const key = /\$|\d/.test(x.w) || H.has(norm(x.w));
           return <span key={i} style={{ color: key ? KEY : "#fff", opacity: t >= x.at ? 1 : 0.5 }}>{x.w} </span>;
@@ -179,9 +184,9 @@ export const Sfx: React.FC<{ name: string; at: number; vol?: number; dur?: numbe
 );
 
 /** captions from timeline.lines(): shows the line being spoken, words light up as they are said */
-export const Captions: React.FC<{ t: number; lines: { start: number; end: number; words: { w: string; at: number }[] }[]; hi?: string[] }> = ({ t, lines, hi }) => {
+export const Captions: React.FC<{ t: number; lines: { start: number; end: number; words: { w: string; at: number }[] }[]; hi?: string[]; st?: CapStyle }> = ({ t, lines, hi, st }) => {
   const line = lines.find((l) => t >= l.start - 2 && t < l.end);
-  return line ? <Caption t={t} words={line.words} hi={hi} /> : null;
+  return line ? <Caption t={t} words={line.words} hi={hi} st={st} /> : null;
 };
 
 // ── scene templates (MapScroll / Crayon Capital structure, drawn in our doodle style) ───────────
@@ -199,15 +204,15 @@ export const Tag: React.FC<{ t: number; at: number; x: number; y: number; text: 
 
 /** big hand-lettered number that pops in and counts up (fmt turns the running value into text) */
 export const BigNum: React.FC<{ t: number; at: number; x: number; y: number; to: number; from?: number; dur?: number; size?: number;
-  col?: string; fmt?: (n: number) => string; r?: number; sub?: string }> =
-  ({ t, at, x, y, to, from = 0, dur = 18, size = 150, col = COL.ink, fmt = money, r = -2, sub }) => {
+  col?: string; fmt?: (n: number) => string; r?: number; sub?: string; subSize?: number }> =
+  ({ t, at, x, y, to, from = 0, dur = 18, size = 150, col = COL.ink, fmt = money, r = -2, sub, subSize }) => {
     if (t < at) return null;
     const v = count(t, at, at + dur, from, to);
     return (
       <PopG t={t} at={at} x={x} y={y} r={r}>
         <text x={x} y={y} fontFamily={HAND} fontWeight={700} fontSize={size} textAnchor="middle" fill={col}
           stroke="#fffdf3" strokeWidth={size * 0.12} strokeLinejoin="round" style={{ paintOrder: "stroke" }}>{fmt(v)}</text>
-        {sub && <Txt x={x} y={y + size * 0.42} size={Math.max(34, size * 0.26)} font={HAND2} col="#4a4a55">{sub}</Txt>}
+        {sub && <Txt x={x} y={y + size * 0.42 + (subSize ? subSize * 0.2 : 0)} size={subSize ?? Math.max(34, size * 0.26)} font={HAND2} col="#4a4a55">{sub}</Txt>}
       </PopG>
     );
   };
