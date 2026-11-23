@@ -361,10 +361,10 @@ const ItemView: React.FC<{ s: Shot; it: Item; g: number; n: number }> = ({ s, it
       </PopG>);
     case "tag": return <Tag t={g} at={at} x={it.x} y={it.y} text={it.text} size={it.size ?? 40} bg={it.bg} r={it.r ?? 0} />;
     case "num": return <BigNum t={g} at={at} x={it.x} y={it.y} to={it.to} from={it.from ?? 0} size={it.size ?? 140} col={it.col ?? COL.ink}
-      fmt={fmtOf(it.f, it.pre, it.post)} sub={it.sub} r={it.r ?? -2} />;
+      fmt={fmtOf(it.f, it.pre, it.post)} sub={it.sub} subSize={it.ss} r={it.r ?? -2} />;
     case "txt": return g >= at ? <Txt x={it.x} y={it.y} size={it.size ?? 60} col={it.col ?? COL.ink} o={clamp01((g - at) / 6)} font={it.font} rot={it.rot ?? 0}>{it.text}</Txt> : null;
     case "stamp": return <Stamp t={g} at={at} x={it.x} y={it.y} text={it.text} size={it.size ?? 70} r={it.r ?? -8} col={it.col ?? COL.red} />;
-    case "quote": return <QuoteCard t={g} at={at} quote={it.quote} who={it.who} src={it.src} x={it.x ?? 960} y={it.y ?? 430} size={it.size ?? 80} />;
+    case "quote": return <QuoteCard t={g} at={at} quote={it.quote} who={it.who} src={it.src} x={it.x ?? 960} y={it.y ?? 430} size={it.size ?? 80} wd={it.wd} />;
     case "bubble": return <Bubble t={g} at={at} x={it.x} y={it.y} w={it.wd} lines={it.lines} tx={it.tx} ty={it.ty} size={it.size ?? 52} />;
     case "prop": return (
       <PopG t={g} at={at} x={it.x} y={it.y - 100} r={it.r ?? 0}>
